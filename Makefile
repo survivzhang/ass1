@@ -61,7 +61,7 @@ benchmark: $(TARGET)
 
 # Clean build artifacts
 clean:
-	rm -f $(OBJECTS) $(TARGET) *.txt
+	rm -f $(OBJECTS) $(TARGET)
 
 # Install (copy to system directory - requires sudo)
 install: $(TARGET)

@@ -52,7 +52,7 @@ void conv2d_parallel(float **f, int H, int W, float **g, int kH, int kW, float *
     // Parallelize over output rows
     #pragma omp parallel for schedule(static) \
         shared(f, g, output, H, W, kH, kW, pad_h, pad_w) \
-        private(i, j, ki, kj, sum, input_i, input_j)
+        // private(i, j, ki, kj, sum, input_i, input_j)
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
             float sum = 0.0f;

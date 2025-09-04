@@ -1,4 +1,5 @@
 #include "conv2d.h"
+#include <math.h>
 
 void print_usage(const char *program_name) {
     printf("Usage: %s [OPTIONS]\n", program_name);
