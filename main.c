@@ -94,27 +94,7 @@ int main(int argc, char **argv) {
     int f_rows, f_cols, g_rows, g_cols;
     
     // Read or generate input arrays
-    if (input_file && kernel_file) {
-        // Read from files
-        printf("Reading input from %s and kernel from %s\n", input_file, kernel_file);
-        
-        if (read_array_from_file(input_file, &f, &f_rows, &f_cols) != 0) {
-            fprintf(stderr, "Error reading input file\n");
-            return 1;
-        }
-        
-        if (read_array_from_file(kernel_file, &g, &g_rows, &g_cols) != 0) {
-            fprintf(stderr, "Error reading kernel file\n");
-            free_2d_array(f, f_rows);
-            return 1;
-        }
-        
-        H = f_rows;
-        W = f_cols;
-        kH = g_rows;
-        kW = g_cols;
-        
-    } else if (H > 0 && W > 0 && kH > 0 && kW > 0) {
+    if (H > 0 && W > 0 && kH > 0 && kW > 0) {
         // Generate random arrays
         printf("Generating random %dx%d input and %dx%d kernel\n", H, W, kH, kW);
         
@@ -141,6 +121,26 @@ int main(int argc, char **argv) {
             printf("Saving generated kernel to %s\n", kernel_file);
             write_array_to_file(kernel_file, g, kH, kW);
         }
+        
+    } else if (input_file && kernel_file) {
+        // Read from files
+        printf("Reading input from %s and kernel from %s\n", input_file, kernel_file);
+        
+        if (read_array_from_file(input_file, &f, &f_rows, &f_cols) != 0) {
+            fprintf(stderr, "Error reading input file\n");
+            return 1;
+        }
+        
+        if (read_array_from_file(kernel_file, &g, &g_rows, &g_cols) != 0) {
+            fprintf(stderr, "Error reading kernel file\n");
+            free_2d_array(f, f_rows);
+            return 1;
+        }
+        
+        H = f_rows;
+        W = f_cols;
+        kH = g_rows;
+        kW = g_cols;
         
     } else {
         fprintf(stderr, "Error: Must provide either input files (-f, -g) or generation parameters (-H, -W, -h, -w)\n");
