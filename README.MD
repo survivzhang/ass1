@@ -1,21 +1,8 @@
 # 2D Convolution with OpenMP Parallelization
 
 **CITS3402/CITS5507 Assignment 1**  
-**Authors:** [Your Name and Student Number]  
+**Authors:** Jiazheng Guo(24070858),Zichen Zhang(24064091)
 **Due:** Friday, 12th September 2025
-
-## Overview
-
-This project implements a high-performance 2D discrete convolution library using OpenMP for parallelization. The implementation supports both serial and parallel execution modes with "same" padding, handles arbitrarily large arrays using single-precision floating-point numbers (float32), and provides comprehensive I/O functionality.
-
-## Features
-
-- **Serial and Parallel Implementations**: Both `conv2d_serial()` and `conv2d_parallel()` functions
-- **OpenMP Parallelization**: Efficient parallel execution using static scheduling
-- **"Same" Padding**: Zero-padding to maintain input/output size equality
-- **Flexible I/O**: Read from files or generate random arrays
-- **Memory Efficient**: Optimized memory layout for cache locality
-- **Comprehensive Testing**: Built-in correctness verification and performance comparison
 
 ## Building the Project
 
@@ -90,8 +77,3 @@ Example:
 0.122 0.169 0.316 0.111
 ```
 
-## Implementation Details
-
-### Memory Layout
-Arrays are stored in row-major order using an array of pointers structure (`float**`). This provides:
-- Cache-friendly access patterns
