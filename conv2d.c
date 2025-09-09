@@ -8,8 +8,11 @@
  * by accessing consecutive memory locations in the innermost loops
  */
 void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **output) {
-    int pad_h = kH / 2;  // Padding for height
-    int pad_w = kW / 2;  // Padding for width
+    // Use precise padding calculation for both odd and even kernels
+    int pad_top = (kH - 1) / 2;
+    int pad_bottom = kH - 1 - pad_top;
+    int pad_left = (kW - 1) / 2;
+    int pad_right = kW - 1 - pad_left;
     
     // For each output pixel
     for (int i = 0; i < H; i++) {
@@ -20,13 +23,13 @@ void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **o
             for (int ki = 0; ki < kH; ki++) {
                 for (int kj = 0; kj < kW; kj++) {
                     // Calculate input indices with padding
-                    int input_i = i + ki - pad_h;
-                    int input_j = j + kj - pad_w;
+                    int input_i = i + ki - pad_top;
+                    int input_j = j + kj - pad_left;
                     
                     // Apply "same" padding (zero-padding outside boundaries)
                     if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
-                        // Flip kernel for proper convolution (180-degree rotation)
-                        sum += f[input_i][input_j] * g[kH - 1 - ki][kW - 1 - kj];
+                        // Direct convolution without kernel flipping (correlation)
+                        sum += f[input_i][input_j] * g[ki][kj];
                     }
                     // If outside boundaries, the padded value is 0, so no contribution
                 }
@@ -47,12 +50,15 @@ void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **o
  * - Private variables: i, j, ki, kj, sum, pad_h, pad_w, input_i, input_j
  */
 void conv2d_parallel(float **f, int H, int W, float **g, int kH, int kW, float **output) {
-    int pad_h = kH / 2;  // Padding for height
-    int pad_w = kW / 2;  // Padding for width
+    // Use precise padding calculation for both odd and even kernels
+    int pad_top = (kH - 1) / 2;
+    int pad_bottom = kH - 1 - pad_top;
+    int pad_left = (kW - 1) / 2;
+    int pad_right = kW - 1 - pad_left;
     
     // Parallelize over output rows
     #pragma omp parallel for schedule(static) \
-        shared(f, g, output, H, W, kH, kW, pad_h, pad_w) \
+        shared(f, g, output, H, W, kH, kW, pad_top, pad_left) \
         // private(i, j, ki, kj, sum, input_i, input_j)
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
@@ -62,13 +68,13 @@ void conv2d_parallel(float **f, int H, int W, float **g, int kH, int kW, float *
             for (int ki = 0; ki < kH; ki++) {
                 for (int kj = 0; kj < kW; kj++) {
                     // Calculate input indices with padding
-                    int input_i = i + ki - pad_h;
-                    int input_j = j + kj - pad_w;
+                    int input_i = i + ki - pad_top;
+                    int input_j = j + kj - pad_left;
                     
                     // Apply "same" padding (zero-padding outside boundaries)
                     if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
-                        // Flip kernel for proper convolution (180-degree rotation)
-                        sum += f[input_i][input_j] * g[kH - 1 - ki][kW - 1 - kj];
+                        // Direct convolution without kernel flipping (correlation)
+                        sum += f[input_i][input_j] * g[ki][kj];
                     }
                 }
             }
