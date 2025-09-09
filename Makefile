@@ -39,15 +39,32 @@ clean:
 install: $(TARGET)
 	cp $(TARGET) /usr/local/bin/
 
+# Performance analysis with different thread counts
+analyze: $(TARGET)
+	@echo "Running performance analysis with f0.txt and g0.txt..."
+	@if [ -f f0.txt ] && [ -f g0.txt ]; then \
+		./$(TARGET) -f f0.txt -g g0.txt -a; \
+	else \
+		echo "f0.txt or g0.txt not found, using random data..."; \
+		./$(TARGET) -H 100 -W 100 -h 3 -w 3 -a; \
+	fi
+
+# Performance analysis with large random data
+analyze-large: $(TARGET)
+	@echo "Running performance analysis with large random data..."
+	./$(TARGET) -H 500 -W 500 -h 5 -w 5 -a
+
 # Show help
 help:
 	@echo "Available targets:"
 	@echo "  all        - Build the main executable (default)"
 	@echo "  debug      - Build with debug flags"
 	@echo "  performance- Build with maximum optimization"
+	@echo "  analyze    - Run performance analysis with f0.txt/g0.txt"
+	@echo "  analyze-large - Run performance analysis with large random data"
 	@echo "  clean      - Remove build artifacts"
 	@echo "  install    - Install to system directory"
 	@echo "  help       - Show this help message"
 
 # Prevent make from treating file names as targets
-.PHONY: all debug performance clean install help
+.PHONY: all debug performance analyze analyze-large clean install help

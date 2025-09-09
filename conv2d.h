@@ -35,6 +35,9 @@ void generate_random_array_omp(float **array, int rows, int cols);
 void configure_omp_settings(int num_threads);
 int get_omp_thread_count();
 
+// Performance analysis utilities
+void performance_analysis_threads(float **f, int H, int W, float **g, int kH, int kW);
+
 // Timing utilities
 double get_time_diff(struct timespec start, struct timespec end);
 

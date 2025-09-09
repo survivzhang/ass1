@@ -16,12 +16,14 @@ void print_usage(const char *program_name) {
     printf("  -s          Use serial implementation only\n");
     printf("  -p          Use parallel implementation only\n");
     printf("  -c          Compare serial and parallel implementations\n");
+    printf("  -a          Analyze performance across different thread counts\n");
     printf("  --help      Show this help message\n\n");
     printf("Examples:\n");
     printf("  %s -f f.txt -g g.txt\n", program_name);
     printf("  %s -f f.txt -g g.txt -o output.txt\n", program_name);
     printf("  %s -H 1000 -W 1000 -h 3 -w 3\n", program_name);
-    printf("  %s -H 1000 -W 1000 -h 3 -w 3 -f f.txt -g g.txt -o o.txt\n", program_name);
+    printf("  %s -H 1000 -W 1000 -h 3 -w 3 -a\n", program_name);
+    printf("  %s -f f0.txt -g g0.txt -a\n", program_name);
 }
 
 int main(int argc, char **argv) {
@@ -31,11 +33,11 @@ int main(int argc, char **argv) {
     char *output_file = NULL;
     int H = 0, W = 0, kH = 0, kW = 0;
     int num_threads = 0;
-    int use_serial = 0, use_parallel = 0, compare_mode = 0;
+    int use_serial = 0, use_parallel = 0, compare_mode = 0, analyze_mode = 0;
     
     // Parse command line arguments
     int opt;
-    while ((opt = getopt(argc, argv, "f:g:o:H:W:h:w:t:spc")) != -1) {
+    while ((opt = getopt(argc, argv, "f:g:o:H:W:h:w:t:spca")) != -1) {
         switch (opt) {
             case 'f':
                 input_file = optarg;
@@ -69,6 +71,9 @@ int main(int argc, char **argv) {
                 break;
             case 'c':
                 compare_mode = 1;
+                break;
+            case 'a':
+                analyze_mode = 1;
                 break;
             default:
                 print_usage(argv[0]);
@@ -165,6 +170,18 @@ int main(int argc, char **argv) {
     // Timing variables
     struct timespec start, end;
     double serial_time = 0.0, parallel_time = 0.0;
+    
+    // Perform performance analysis if requested
+    if (analyze_mode) {
+        printf("Running performance analysis across 1-16 threads...\n");
+        performance_analysis_threads(f, H, W, g, kH, kW);
+        
+        // Clean up and exit
+        free_2d_array(f, f_rows);
+        free_2d_array(g, g_rows);
+        free_2d_array(output, H);
+        return 0;
+    }
     
     // Perform convolution based on mode
     if (use_serial || compare_mode) {
