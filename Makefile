@@ -3,7 +3,7 @@
 
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -O3 -fopenmp -std=c99
+CFLAGS = -fopenmp
 LDFLAGS = -lm -fopenmp
 
 # Source files

@@ -10,9 +10,7 @@
 void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **output) {
     // Use precise padding calculation for both odd and even kernels
     int pad_top = (kH - 1) / 2;
-    int pad_bottom = kH - 1 - pad_top;
     int pad_left = (kW - 1) / 2;
-    int pad_right = kW - 1 - pad_left;
     
     // For each output pixel
     for (int i = 0; i < H; i++) {
@@ -52,15 +50,12 @@ void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **o
 void conv2d_omp_parallel(float **f, int H, int W, float **g, int kH, int kW, float **output) {
     // Use precise padding calculation for both odd and even kernels
     int pad_top = (kH - 1) / 2;
-    int pad_bottom = kH - 1 - pad_top;
     int pad_left = (kW - 1) / 2;
-    int pad_right = kW - 1 - pad_left;
     
     // Parallelize over output rows with dynamic scheduling
     // Dynamic scheduling provides better load balancing for varying kernel sizes
     #pragma omp parallel for schedule(dynamic, 1) \
-        shared(f, g, output, H, W, kH, kW, pad_top, pad_left) \
-        private(i, j, ki, kj, sum, input_i, input_j)
+        shared(f, g, output, H, W, kH, kW, pad_top, pad_left)
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
             float sum = 0.0f;
@@ -95,17 +90,14 @@ void conv2d_omp_parallel(float **f, int H, int W, float **g, int kH, int kW, flo
 void conv2d_omp_blocked(float **f, int H, int W, float **g, int kH, int kW, float **output) {
     // Use precise padding calculation for both odd and even kernels
     int pad_top = (kH - 1) / 2;
-    int pad_bottom = kH - 1 - pad_top;
     int pad_left = (kW - 1) / 2;
-    int pad_right = kW - 1 - pad_left;
     
     // Calculate optimal block size based on matrix dimensions
     int block_size = (H > 100) ? 16 : 8;  // Larger blocks for bigger matrices
     
     // Parallelize over output rows with dynamic scheduling and larger chunks
     #pragma omp parallel for schedule(dynamic, block_size) \
-        shared(f, g, output, H, W, kH, kW, pad_top, pad_left) \
-        private(i, j, ki, kj, sum, input_i, input_j)
+        shared(f, g, output, H, W, kH, kW, pad_top, pad_left)
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
             float sum = 0.0f;
