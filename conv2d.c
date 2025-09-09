@@ -40,26 +40,72 @@ void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **o
 }
 
 /**
- * Parallel implementation of 2D convolution using OpenMP
+ * OpenMP parallel implementation of 2D convolution
  * 
- * Parallelization strategy:
+ * Parallelization strategy inspired by omp.cpp:
  * - Parallelized over output rows using #pragma omp parallel for
- * - Each thread processes a contiguous block of rows to maintain cache locality
- * - Static scheduling is used for predictable load balancing
+ * - Dynamic scheduling for better load balancing with varying kernel sizes
+ * - Each thread processes contiguous blocks to maintain cache locality
  * - Shared variables: f, g, output, H, W, kH, kW (read-only)
- * - Private variables: i, j, ki, kj, sum, pad_h, pad_w, input_i, input_j
+ * - Private variables: i, j, ki, kj, sum, input_i, input_j
  */
-void conv2d_parallel(float **f, int H, int W, float **g, int kH, int kW, float **output) {
+void conv2d_omp_parallel(float **f, int H, int W, float **g, int kH, int kW, float **output) {
     // Use precise padding calculation for both odd and even kernels
     int pad_top = (kH - 1) / 2;
     int pad_bottom = kH - 1 - pad_top;
     int pad_left = (kW - 1) / 2;
     int pad_right = kW - 1 - pad_left;
     
-    // Parallelize over output rows
-    #pragma omp parallel for schedule(static) \
+    // Parallelize over output rows with dynamic scheduling
+    // Dynamic scheduling provides better load balancing for varying kernel sizes
+    #pragma omp parallel for schedule(dynamic, 1) \
         shared(f, g, output, H, W, kH, kW, pad_top, pad_left) \
-        // private(i, j, ki, kj, sum, input_i, input_j)
+        private(i, j, ki, kj, sum, input_i, input_j)
+    for (int i = 0; i < H; i++) {
+        for (int j = 0; j < W; j++) {
+            float sum = 0.0f;
+            
+            // Convolve with kernel
+            for (int ki = 0; ki < kH; ki++) {
+                for (int kj = 0; kj < kW; kj++) {
+                    // Calculate input indices with padding
+                    int input_i = i + ki - pad_top;
+                    int input_j = j + kj - pad_left;
+                    
+                    // Apply "same" padding (zero-padding outside boundaries)
+                    if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                        // Direct convolution without kernel flipping (correlation)
+                        sum += f[input_i][input_j] * g[ki][kj];
+                    }
+                }
+            }
+            output[i][j] = sum;
+        }
+    }
+}
+
+/**
+ * OpenMP blocked parallel implementation of 2D convolution
+ * 
+ * Advanced parallelization strategy inspired by omp.cpp:
+ * - Uses block-based parallelization for better cache utilization
+ * - Dynamic scheduling with larger chunks for reduced overhead
+ * - Optimized for large matrices with better load balancing
+ */
+void conv2d_omp_blocked(float **f, int H, int W, float **g, int kH, int kW, float **output) {
+    // Use precise padding calculation for both odd and even kernels
+    int pad_top = (kH - 1) / 2;
+    int pad_bottom = kH - 1 - pad_top;
+    int pad_left = (kW - 1) / 2;
+    int pad_right = kW - 1 - pad_left;
+    
+    // Calculate optimal block size based on matrix dimensions
+    int block_size = (H > 100) ? 16 : 8;  // Larger blocks for bigger matrices
+    
+    // Parallelize over output rows with dynamic scheduling and larger chunks
+    #pragma omp parallel for schedule(dynamic, block_size) \
+        shared(f, g, output, H, W, kH, kW, pad_top, pad_left) \
+        private(i, j, ki, kj, sum, input_i, input_j)
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
             float sum = 0.0f;
@@ -204,10 +250,10 @@ int write_array_to_file(const char *filename, float **array, int rows, int cols)
 }
 
 /**
- * Generate random array with values between 0 and 1
- * Uses thread-safe random number generation
+ * Generate random array with values between 0 and 1 (Serial version)
+ * Single-threaded implementation for compatibility
  */
-void generate_random_array(float **array, int rows, int cols) {
+void generate_random_array_serial(float **array, int rows, int cols) {
     // Seed random number generator with current time
     srand((unsigned int)time(NULL));
     
@@ -216,6 +262,50 @@ void generate_random_array(float **array, int rows, int cols) {
             array[i][j] = (float)rand() / (float)RAND_MAX;
         }
     }
+}
+
+/**
+ * Generate random array with values between 0 and 1 (OpenMP parallel version)
+ * Thread-safe parallel implementation inspired by omp.cpp
+ */
+void generate_random_array_omp(float **array, int rows, int cols) {
+    // Use thread-safe random number generation with OpenMP
+    #pragma omp parallel
+    {
+        // Each thread gets its own random number generator
+        unsigned int seed = (unsigned int)time(NULL) + omp_get_thread_num();
+        
+        #pragma omp for schedule(dynamic, 1)
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                // Use thread-local random number generation
+                array[i][j] = (float)rand_r(&seed) / (float)RAND_MAX;
+            }
+        }
+    }
+}
+
+
+/**
+ * Configure OpenMP settings for optimal performance
+ * Inspired by omp.cpp's thread configuration approach
+ */
+void configure_omp_settings(int num_threads) {
+    #ifdef _OPENMP
+    omp_set_num_threads(num_threads);
+    omp_set_schedule(omp_sched_dynamic, 1);
+    #endif
+}
+
+/**
+ * Get the number of available OpenMP threads
+ */
+int get_omp_thread_count() {
+    #ifdef _OPENMP
+    return omp_get_max_threads();
+    #else
+    return 1;
+    #endif
 }
 
 /**

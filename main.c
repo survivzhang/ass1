@@ -106,8 +106,8 @@ int main(int argc, char **argv) {
             return 1;
         }
         
-        generate_random_array(f, H, W);
-        generate_random_array(g, kH, kW);
+        generate_random_array_omp(f, H, W);
+        generate_random_array_omp(g, kH, kW);
         
         f_rows = H; f_cols = W;
         g_rows = kH; g_cols = kW;
@@ -187,7 +187,7 @@ int main(int argc, char **argv) {
         
         printf("Running parallel convolution...\n");
         clock_gettime(CLOCK_MONOTONIC, &start);
-        conv2d_parallel(f, H, W, g, kH, kW, parallel_output);
+        conv2d_omp_parallel(f, H, W, g, kH, kW, parallel_output);
         clock_gettime(CLOCK_MONOTONIC, &end);
         parallel_time = get_time_diff(start, end);
         printf("Parallel execution time: %.6f seconds\n", parallel_time);
