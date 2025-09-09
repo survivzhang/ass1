@@ -155,7 +155,7 @@ Expected Results:
 
 Actual Results:
 
-<img src="D:\ass1\actual_result.png" alt="actual_result" style="zoom:150%;" />
+<img src=".\actual_result.png" alt="actual_result" style="zoom:150%;" />
 
 After careful analysis, we have determined that the reasons for the inconsistent results are as follows:
 

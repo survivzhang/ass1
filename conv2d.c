@@ -25,7 +25,8 @@ void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **o
                     
                     // Apply "same" padding (zero-padding outside boundaries)
                     if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
-                        sum += f[input_i][input_j] * g[ki][kj];
+                        // Flip kernel for proper convolution (180-degree rotation)
+                        sum += f[input_i][input_j] * g[kH - 1 - ki][kW - 1 - kj];
                     }
                     // If outside boundaries, the padded value is 0, so no contribution
                 }
@@ -66,7 +67,8 @@ void conv2d_parallel(float **f, int H, int W, float **g, int kH, int kW, float *
                     
                     // Apply "same" padding (zero-padding outside boundaries)
                     if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
-                        sum += f[input_i][input_j] * g[ki][kj];
+                        // Flip kernel for proper convolution (180-degree rotation)
+                        sum += f[input_i][input_j] * g[kH - 1 - ki][kW - 1 - kj];
                     }
                 }
             }
