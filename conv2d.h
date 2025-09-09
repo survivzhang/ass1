@@ -25,11 +25,7 @@ int read_array_from_file(const char *filename, float ***array, int *rows, int *c
 int write_array_to_file(const char *filename, float **array, int rows, int cols);
 
 // Random array generation
-// Serial (single-threaded) random generation
-void generate_random_array_serial(float **array, int rows, int cols);
-
-// Parallel (multi-threaded) random generation
-void generate_random_array_omp(float **array, int rows, int cols);
+void generate_random_array(float **array, int rows, int cols);
 
 // OpenMP configuration utilities
 void configure_omp_settings(int num_threads);

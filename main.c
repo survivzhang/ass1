@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
     
     // Read or generate input arrays
     if (H > 0 && W > 0 && kH > 0 && kW > 0) {
-        // Generate random arrays
+        // Generate random arrays (not timed)
         printf("Generating random %dx%d input and %dx%d kernel\n", H, W, kH, kW);
         
         f = allocate_2d_array(H, W);
@@ -111,13 +111,13 @@ int main(int argc, char **argv) {
             return 1;
         }
         
-        generate_random_array_omp(f, H, W);
-        generate_random_array_omp(g, kH, kW);
+        generate_random_array(f, H, W);
+        generate_random_array(g, kH, kW);
         
         f_rows = H; f_cols = W;
         g_rows = kH; g_cols = kW;
         
-        // Save generated arrays if filenames provided
+        // Save generated arrays if filenames provided (not timed)
         if (input_file) {
             printf("Saving generated input to %s\n", input_file);
             write_array_to_file(input_file, f, H, W);
@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
         }
         
     } else if (input_file && kernel_file) {
-        // Read from files
+        // Read from files (not timed)
         printf("Reading input from %s and kernel from %s\n", input_file, kernel_file);
         
         if (read_array_from_file(input_file, &f, &f_rows, &f_cols) != 0) {
@@ -186,11 +186,12 @@ int main(int argc, char **argv) {
     // Perform convolution based on mode
     if (use_serial || compare_mode) {
         printf("Running serial convolution...\n");
+        // Measure pure computation time only
         clock_gettime(CLOCK_MONOTONIC, &start);
         conv2d_serial(f, H, W, g, kH, kW, output);
         clock_gettime(CLOCK_MONOTONIC, &end);
         serial_time = get_time_diff(start, end);
-        printf("Serial execution time: %.6f seconds\n", serial_time);
+        printf("Serial computation time: %.6f seconds\n", serial_time);
         
         if (!compare_mode && output_file) {
             printf("Writing output to %s\n", output_file);
@@ -203,11 +204,12 @@ int main(int argc, char **argv) {
         float **parallel_output = compare_mode ? allocate_2d_array(H, W) : output;
         
         printf("Running parallel convolution...\n");
+        // Measure pure computation time only
         clock_gettime(CLOCK_MONOTONIC, &start);
         conv2d_omp_parallel(f, H, W, g, kH, kW, parallel_output);
         clock_gettime(CLOCK_MONOTONIC, &end);
         parallel_time = get_time_diff(start, end);
-        printf("Parallel execution time: %.6f seconds\n", parallel_time);
+        printf("Parallel computation time: %.6f seconds\n", parallel_time);
         
         if (!compare_mode && output_file) {
             printf("Writing output to %s\n", output_file);
@@ -255,10 +257,10 @@ int main(int argc, char **argv) {
         printf("\nPerformance Summary:\n");
         printf("Array size: %dx%d, Kernel size: %dx%d\n", H, W, kH, kW);
         printf("Threads: %d\n", omp_get_max_threads());
-        printf("Serial time:   %.6f seconds\n", serial_time);
-        printf("Parallel time: %.6f seconds\n", parallel_time);
-        printf("Speedup:       %.2fx\n", serial_time / parallel_time);
-        printf("Efficiency:    %.2f%%\n", 100.0 * serial_time / (parallel_time * omp_get_max_threads()));
+        printf("Serial computation time:   %.6f seconds\n", serial_time);
+        printf("Parallel computation time: %.6f seconds\n", parallel_time);
+        printf("Speedup:                   %.2fx\n", serial_time / parallel_time);
+        printf("Efficiency:                %.2f%%\n", 100.0 * serial_time / (parallel_time * omp_get_max_threads()));
     }
     
     // Clean up

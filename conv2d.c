@@ -250,37 +250,16 @@ int write_array_to_file(const char *filename, float **array, int rows, int cols)
 }
 
 /**
- * Generate random array with values between 0 and 1 (Serial version)
- * Single-threaded implementation for compatibility
+ * Generate random array with values between 0 and 1
+ * Simple single-threaded implementation (not timed in performance tests)
  */
-void generate_random_array_serial(float **array, int rows, int cols) {
+void generate_random_array(float **array, int rows, int cols) {
     // Seed random number generator with current time
     srand((unsigned int)time(NULL));
     
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             array[i][j] = (float)rand() / (float)RAND_MAX;
-        }
-    }
-}
-
-/**
- * Generate random array with values between 0 and 1 (OpenMP parallel version)
- * Thread-safe parallel implementation inspired by omp.cpp
- */
-void generate_random_array_omp(float **array, int rows, int cols) {
-    // Use thread-safe random number generation with OpenMP
-    #pragma omp parallel
-    {
-        // Each thread gets its own random number generator
-        unsigned int seed = (unsigned int)time(NULL) + omp_get_thread_num();
-        
-        #pragma omp for schedule(dynamic, 1)
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                // Use thread-local random number generation
-                array[i][j] = (float)rand_r(&seed) / (float)RAND_MAX;
-            }
         }
     }
 }
@@ -322,10 +301,10 @@ void performance_analysis_threads(float **f, int H, int W, float **g, int kH, in
             continue;
         }
         
-        // Warm up
+        // Warm up (not timed)
         conv2d_omp_parallel(f, H, W, g, kH, kW, output);
         
-        // Measure performance
+        // Measure pure computation time only
         clock_gettime(CLOCK_MONOTONIC, &start);
         conv2d_omp_parallel(f, H, W, g, kH, kW, output);
         clock_gettime(CLOCK_MONOTONIC, &end);
