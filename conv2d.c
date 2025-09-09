@@ -278,19 +278,20 @@ void configure_omp_settings(int num_threads) {
 }
 
 /**
- * Performance analysis function to test different thread counts (1-16 threads)
+ * Performance analysis function to test different thread counts (1 to max threads)
  * Inspired by omp.cpp's performance testing approach
  */
 void performance_analysis_threads(float **f, int H, int W, float **g, int kH, int kW) {
-    printf("\n=== Thread Performance Analysis (1-16 threads) ===\n");
+    int max_threads = get_omp_thread_count();
+    printf("\n=== Thread Performance Analysis (1-%d threads) ===\n", max_threads);
     printf("Matrix size: %dx%d, Kernel size: %dx%d\n", H, W, kH, kW);
-    printf("Testing thread counts from 1 to 16\n\n");
+    printf("Testing thread counts from 1 to %d\n\n", max_threads);
     
     struct timespec start, end;
     double best_time = 1e9;
     int best_threads = 1;
     
-    for (int threads = 1; threads <= 16; threads++) {
+    for (int threads = 1; threads <= max_threads; threads++) {
         // Configure threads
         configure_omp_settings(threads);
         
