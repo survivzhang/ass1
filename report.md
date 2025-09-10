@@ -13,46 +13,173 @@ Convolution is a key operation in image processing, computer vision, and machine
 
 ## 2. Implementation Details
 
-The convolution function follows the required signature:
+### 2.1 Serial implementation of 2D convolution
 
-```c
-void conv2d(
-    float **f, int H, int W,
-    float **g, int kH, int kW,
-    float **output
-);
+```
+// Serial implementation of 2D convolution with "same" padding
+void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **output) {
+    // ...
+    for (int i = 0; i < H; i++) {
+        for (int j = 0; j < W; j++) {
+            float sum = 0.0f;
+            for (int ki = 0; ki < kH; ki++) {
+                for (int kj = 0; kj < kW; kj++) {
+                    int input_i = i + ki - pad_top;
+                    int input_j = j + kj - pad_left;
+                    if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                        sum += f[input_i][input_j] * g[ki][kj];
+                    }
+                }
+            }
+            output[i][j] = sum;
+        }
+    }
+}
 ```
 
-Key details:
+The `conv2d_serial` function in the file implements a serial version of 2D convolution. The algorithm operates as follows:
 
-* Both input (`f`) and kernel (`g`) are read either from text files or generated randomly (using dimensions `H × W` and `kH × kW`).
-* “Same” padding is implemented by extending the input with zeros along the boundaries, ensuring that the output has the same size as the input.
-* The serial version uses three nested loops: over rows, columns, and kernel elements. The parallel version uses OpenMP directives.
-* Input/output is handled via text files, consistent with the provided file format specification.
+1. Outer Loop: Iterate through each pixel position `(i, j)` in the output matrix `output` using two nested loops.
+2. Inner Loop: For each output pixel, iterate through each element `(ki, kj)` in the convolution kernel g using another set of nested loops.
+3. Computation: Within the inner loop, the pixel position `(input_i, input_j)` in the input image f corresponding to kernel element `g[ki][kj]`is calculated via `(i + ki - pad_top, j + kj - pad_left)`.
+4. Boundary Handling: `If (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W)`, perform “same” padding. If the calculated input pixel position lies within the original image boundaries, multiply its value by the corresponding convolution kernel value and accumulate it into `sum`; if outside the boundaries, perform no operation, which is equivalent to padding with zeros.
+5. Result: After accumulation completes, assign the value of `sum` to `output[i][j]`, completing the calculation for one output pixel.
 
----
+### 2.2 OpenMP parallel implementation of 2D convolution
+
+This function uses the `#pragma omp parallel for` directive to parallelize the outermost output row loop.
+
+```
+void conv2d_omp_parallel(float **f, int H, int W, float **g, int kH, int kW, float **output) {
+    // ...
+    #pragma omp parallel for schedule(dynamic, 1) \
+        shared(f, g, output, H, W, kH, kW, pad_top, pad_left)
+    for (int i = 0; i < H; i++) {
+        //...
+    }
+```
+
+1. Parallelization Strategy: Multiple threads jointly process different rows of the output image. The OpenMP runtime assigns iterations of the outer for loop to different threads.
+
+2. Scheduling Strategy: `schedule(dynamic, 1)` indicates dynamic scheduling, where each loop iteration (i.e., one row) is assigned to an available thread. This strategy facilitates better load balancing, especially when handling convolutional kernels of varying sizes, as computational intensity may differ per row.
+
+3. Variable Management:
+
+​        • `shared(...)`: Variables like `f`, `g`, and `output` are shared across all threads. `f` and `g` are read-only, while output is written to by each thread for its assigned row.
+
+​        • `Private Variables`: Loop variables `i`, `j`, `ki`, `kj`, and local accumulators like `sum` are private to each thread, preventing data races.
+
+### 2.3 OpenMP blocked parallel implementation of 2D convolution
+
+This function also employs the `#pragma omp parallel for` directive, but its primary distinction lies in utilizing a block scheduling strategy to optimize cache utilization and reduce thread synchronization overhead.
+
+    void conv2d_omp_blocked(float **f, int H, int W, float **g, int kH, int kW, float **output) {
+        // ...
+        int block_size = (H > 100) ? 16 : 8;
+        #pragma omp parallel for schedule(dynamic, block_size) \
+            shared(f, g, output, H, W, kH, kW, pad_top, pad_left)
+        for (int i = 0; i < H; i++) {
+           // ...
+        }
+
+1. Parallelization Strategy: Identical to `conv2d_omp_parallel`, it still parallels the output rows.
+
+2. Block Scheduling: The key difference lies in `schedule(dynamic, block_size)`. It bundles loop iterations (rows) into blocks of size `block_size`, then dynamically assigns these blocks to individual threads.
+
+3. Optimization Goals:
+
+​        • Reduce Scheduling Overhead: Assigning blocks instead of individual rows per scheduling round reduces thread management and synchronization frequency, proving particularly effective for large matrices.
+
+​        • Improve cache locality: When a thread processes contiguous blocks of rows, its access patterns to the input image `f` and output image `output` become more localized. While processing a row, the corresponding region of the input image is likely loaded into the cache. When processing the next row within the same block, this data remains in the cache, thereby increasing cache hit rates.
 
 ## 3. Parallelisation Strategy
 
-The parallel implementation leverages **OpenMP loop parallelisation**.
+We provide two distinct parallelization implementations, which are not redundant but rather optimized for different scenarios.
 
-* **Outer loop parallelisation:** The most computationally intensive part is iterating over each output pixel. We parallelised across rows (and optionally columns) using `#pragma omp parallel for collapse(2)` so that multiple threads compute different pixels independently.
-* **Workload distribution:** OpenMP assigns output elements to threads dynamically. Each pixel computation is independent, avoiding race conditions.
-* **Reduction not required:** Since each thread writes to a distinct output cell, no reduction clauses were necessary.
-* **Scheduling:** Both `static` and `dynamic` scheduling were tested. `static` gave better performance for uniform workloads (small kernels), while `dynamic` improved load balance for larger kernels.
+#### 3.1 Design Rationale
 
-This strategy ensures scalability as the number of threads increases, with minimal synchronisation overhead.
+1. `conv2d_omp_parallel` (Basic Parallelization): As the primary parallelization approach, it offers a simple, easy-to-understand parallel model. It demonstrates that the outermost row loop can be parallelized without data races, since each thread only writes its own row's data and performs read-only accesses to the shared input data `f` and `g`.
+2. `conv2d_omp_blocked` (Advanced Parallelism): This represents a further optimization beyond the basic parallelization. It recognizes that in parallel computing, reducing overhead and optimizing cache utilization are equally important alongside parallelization itself. By introducing block scheduling, this implementation demonstrates how sacrificing some load balancing flexibility can yield higher overall performance.
+
+#### 3.2 Comparison with the general parallel scheme
+
+1. Parallelism within loops: Another parallelization approach involves parallelizing the innermost or intermediate loops (e.g., the convolution kernel loops `ki` or `kj`).
+
+2. Advantages of this parallelization algorithm: Parallelizing the outermost row loop is a superior choice because it handles the coarsest-grained task (a complete output row). Each task is sufficiently large to amortize thread creation and management overhead, enabling efficient coarse-grained parallelism. Parallelizing inner loops would result in overly fine-grained tasks, leading to frequent synchronization and data races that could degrade performance. Thus, the code's choice to parallelize the outer loop aligns with parallel programming best practices.
 
 ---
 
 ## 4. Memory Layout and Cache Considerations
 
-* **Array representation:** Arrays were stored as **contiguous 1D blocks** of memory, accessed through `float*` with manual indexing, rather than jagged `float**` allocations. This reduces pointer indirection and improves spatial locality.
-* **Cache efficiency:**
+### 4.1 Memory Layout analysis
 
-  * Accesses to `f` and `g` are sequential within the innermost kernel loop, which enhances cache line reuse.
-  * Since each output cell depends on a local neighbourhood of `f`, temporal locality benefits are limited, but storing data in row-major order helps.
-* **Padding strategy:** Instead of creating a larger padded array, padding was handled logically by bounds checking. This avoided unnecessary memory allocation, reducing cache footprint.
+```
+float** allocate_2d_array(int rows, int cols) {
+    float **array = (float**)malloc(rows * sizeof(float*));
+    if (!array) {
+        fprintf(stderr, "Error: Failed to allocate memory for row pointers\n");
+        return NULL;
+    }
+    
+    // Allocate each row
+    for (int i = 0; i < rows; i++) {
+        array[i] = (float*)malloc(cols * sizeof(float));
+        if (!array[i]) {
+            fprintf(stderr, "Error: Failed to allocate memory for row %d\n", i);
+            // Free previously allocated rows
+            for (int j = 0; j < i; j++) {
+                free(array[j]);
+            }
+            free(array);
+            return NULL;
+        }
+    }
+    
+    return array;
+}
+```
+
+1. Implementation: The `allocate_2d_array` function uses `malloc` to allocate memory for each row separately, managing these row pointers with a pointer array `float** array`.
+
+• `float **array = (float**)malloc(rows * sizeof(float*));`
+
+• `array[i] = (float*)malloc(cols * sizeof(float));`
+
+2. Design Rationale:
+
+​        . Row-wise contiguity: Although the entire matrix may not be contiguous in memory, the `allocate_2d_array` function ensures that data within each row is stored contiguously.
+
+​        . Flexible access pattern: This layout enables access via the intuitive syntax `array[row][col]`, aligning well with C's row-major memory access conventions.
+
+3. Comparison with Single-Block Memory Layout:
+
+​       • Single-Block Memory Layout (`float* array`): Some implementations allocate a contiguous memory block for the entire matrix, accessed via `array[i * cols + j]`. This approach theoretically offers optimal spatial locality since the entire matrix is contiguous.
+
+​       • Advantages of this code: While conv2d.c sacrifices overall contiguity, it preserves row-major contiguity, which suffices for the row-major access pattern in the code (`for (int i = 0; ...)`). More importantly, it avoids the multiplication operation (`i * cols`) for each access, potentially yielding a slight performance advantage on certain compilers or hardware.
+
+### 4.2 Cache Considerrations
+
+```
+for (int j = 0; j < W; j++) { // This is the inner-most loop for the output matrix
+    // ...
+    sum += f[input_i][input_j] * g[ki][kj]; // Accesses inside the inner loops
+    // ...
+}
+```
+
+1. Optimization Principle:
+
+​       • In the `conv2d_serial` function, the inner loop iterates over the column indices `j` of the output matrix. This means that during loop execution, accesses to `output[i][j]` are contiguous (`j` increments). Since each row is stored contiguously in memory, this access pattern exhibits strong spatial locality, enabling efficient utilization of cache lines.
+
+​       • Although the convolution operation exhibits complex access patterns when accessing the input image `f`, placing column accesses to the `output` matrix within the inner loop ensures that at least the write operations to the output matrix are cache-friendly.
+
+​      • For `conv2d_omp_blocked`, the block scheduling strategy further enhances this locality. Each thread processes a contiguous block of `output` rows, making accesses to `f` and `g` more localized to some extent.
+
+2. Comparison with conventional parallel scheduling:
+
+​     • Conventional dynamic scheduling (`schedule(dynamic, 1)`): `conv2d_omp_parallel` employs this approach. It assigns tasks row-by-row, enabling highly granular load balancing. However, this strategy may cause threads to frequently request new tasks from the operating system scheduler, thereby increasing scheduling overhead. Additionally, different rows may be processed by different threads, potentially causing input data access patterns to jump between threads and reducing cache locality.
+
+​    • Advantages of this code: The block scheduling strategy in `conv2d_omp_blocked` strikes a balance between these two approaches. By processing contiguous blocks of rows, a thread's accesses to the input image are more likely to concentrate within a specific memory region while handling its assigned tasks, thereby improving cache hit rates. Simultaneously, the larger block size reduces scheduling overhead, enhancing parallel efficiency—particularly when both the matrix and convolution kernel are large.
 
 ---
 
@@ -125,45 +252,7 @@ The figure above illustrates efficiency changes across different matrix sizes an
 
 ## 6. Testing and Validation
 
-During the testing and validation phase, we utilized the **f.txt** and **g.txt** files described in Assignment 1:
 
-```
-f.txt
-4 4
-0.889 0.364 0.073 0.536
-0.507 0.886 0.843 0.360
-0.103 0.280 0.713 0.827
-0.663 0.131 0.508 0.830
-```
-
-```
-g.txt
-3 3
-0.485 0.529 0.737
-0.638 0.168 0.338
-0.894 0.182 0.314
-```
-
-```
-Expected Results:
-4 4
-0.847 1.858 1.484 0.956
-1.817 2.479 2.078 1.706
-2.167 3.251 2.189 1.799
-1.108 2.256 1.572 1.247
-```
-
-Actual Results:
-
-<img src=".\actual_result.png" alt="actual_result" style="zoom:150%;" />
-
-After careful analysis, we have determined that the reasons for the inconsistent results are as follows:
-
-• Floating-point precision: Since our program uses single-precision floating-point numbers (float), computers generate minor rounding errors during addition and multiplication operations.
-
-• Parallel computation order: In the parallel version, OpenMP may process pixel calculations in a different sequence. This alters the sequence of cumulative sum operations compared to the serial version, leading to minute floating-point discrepancies.
-
-• Tolerance: To account for these inherent floating-point differences, the **main.c** code employs a tolerance of **1e-5f** for comparisons. Results are deemed correct as long as the discrepancy falls within this threshold.
 
 ---
 
