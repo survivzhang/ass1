@@ -4,15 +4,12 @@
 #SBATCH --output=conv_test.out
 #SBATCH --error=conv_test.err
 #SBATCH --cpus-per-task=64
-#SBATCH --time=00:30:00
-#SBATCH --mem=1G
+#SBATCH --time=04:00:00
+#SBATCH --mem=4G
 #SBATCH --partition=cits3402
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=jzguo99@outlook.com
 
-# Load any required modules (adjust as needed for your system)
-# module load gcc/9.3.0
-# module load openmpi/4.0.3
 
 echo "=== 2D Convolution Performance Test ==="
 echo "Job started at: $(date)"

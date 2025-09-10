@@ -4,15 +4,12 @@
 #SBATCH --output=conv_test.out
 #SBATCH --error=conv_test.err
 #SBATCH --cpus-per-task=64
-#SBATCH --time=00:30:00
-#SBATCH --mem=1G
+#SBATCH --time=02:00:00
+#SBATCH --mem=4G
 #SBATCH --partition=cits3402
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=jzguo99@outlook.com
+#SBATCH --mail-user=24070858@student.uwa.edu.au
 
-# Load any required modules (adjust as needed for your system)
-# module load gcc/9.3.0
-# module load openmpi/4.0.3
 
 echo "=== 2D Convolution Performance Test ==="
 echo "Job started at: $(date)"
@@ -20,8 +17,8 @@ echo "Node: $(hostname)"
 echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
 # Test parameters
-MATRIX_SIZE=10000
-KERNEL_SIZE=3
+MATRIX_SIZE=1000
+KERNEL_SIZE=100
 
 echo ""
 echo "=== Test Configuration ==="
@@ -114,6 +111,6 @@ echo "Best computing time: ${computing_times[$optimal_threads]}s"
 
 # Send output file as email attachment
 echo "Sending results via email..."
-mail -s "Convolution Performance Test Results - Job $SLURM_JOB_ID" -a conv_test.out jzguo99@outlook.com < /dev/null
+mail -s "Convolution Performance Test Results - Job $SLURM_JOB_ID" -a conv_test.out 24070858@student.uwa.edu.au < /dev/null
 
 
