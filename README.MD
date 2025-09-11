@@ -13,14 +13,8 @@
 
 ### Compilation
 ```bash
-# Standard build
+# Build the project
 make
-
-# Debug build with debugging symbols
-make debug
-
-# Performance build with maximum optimization
-make performance
 
 # Clean build artifacts
 make clean
@@ -55,7 +49,7 @@ The program supports multiple execution modes through command-line arguments:
 - `-w WIDTH`: Kernel width for random generation
 - `-t THREADS`: Number of OpenMP threads
 - `-s`: Use serial implementation only
-- `-p`: Use parallel implementation only
+- `-p`: Use parallel implementation only （default MAX number）
 - `-c`: Compare serial and parallel implementations
 - `--help`: Show help message
 

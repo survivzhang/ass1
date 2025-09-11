@@ -13,7 +13,6 @@
 void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **output);
 
 // Parallel (multi-threaded) implementations
-void conv2d_omp_parallel(float **f, int H, int W, float **g, int kH, int kW, float **output);
 void conv2d_omp_blocked(float **f, int H, int W, float **g, int kH, int kW, float **output);
 
 // Utility functions for memory management

@@ -37,47 +37,6 @@ void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **o
     }
 }
 
-/**
- * OpenMP parallel implementation of 2D convolution
- * 
- * Parallelization strategy inspired by omp.cpp:
- * - Parallelized over output rows using #pragma omp parallel for
- * - Dynamic scheduling for better load balancing with varying kernel sizes
- * - Each thread processes contiguous blocks to maintain cache locality
- * - Shared variables: f, g, output, H, W, kH, kW (read-only)
- * - Private variables: i, j, ki, kj, sum, input_i, input_j
- */
-void conv2d_omp_parallel(float **f, int H, int W, float **g, int kH, int kW, float **output) {
-    // Use precise padding calculation for both odd and even kernels
-    int pad_top = (kH - 1) / 2;
-    int pad_left = (kW - 1) / 2;
-    
-    // Parallelize over output rows with dynamic scheduling
-    // Dynamic scheduling provides better load balancing for varying kernel sizes
-    #pragma omp parallel for schedule(dynamic, 1) \
-        shared(f, g, output, H, W, kH, kW, pad_top, pad_left)
-    for (int i = 0; i < H; i++) {
-        for (int j = 0; j < W; j++) {
-            float sum = 0.0f;
-            
-            // Convolve with kernel
-            for (int ki = 0; ki < kH; ki++) {
-                for (int kj = 0; kj < kW; kj++) {
-                    // Calculate input indices with padding
-                    int input_i = i + ki - pad_top;
-                    int input_j = j + kj - pad_left;
-                    
-                    // Apply "same" padding (zero-padding outside boundaries)
-                    if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
-                        // Direct convolution without kernel flipping (correlation)
-                        sum += f[input_i][input_j] * g[ki][kj];
-                    }
-                }
-            }
-            output[i][j] = sum;
-        }
-    }
-}
 
 /**
  * OpenMP blocked parallel implementation of 2D convolution
@@ -295,11 +254,11 @@ void performance_analysis_threads(float **f, int H, int W, float **g, int kH, in
         }
         
         // Warm up (not timed)
-        conv2d_omp_parallel(f, H, W, g, kH, kW, output);
+        conv2d_omp_blocked(f, H, W, g, kH, kW, output);
         
         // Measure pure computation time only
         clock_gettime(CLOCK_MONOTONIC, &start);
-        conv2d_omp_parallel(f, H, W, g, kH, kW, output);
+        conv2d_omp_blocked(f, H, W, g, kH, kW, output);
         clock_gettime(CLOCK_MONOTONIC, &end);
         
         double runtime = get_time_diff(start, end);

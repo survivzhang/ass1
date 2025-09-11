@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
         printf("Running parallel convolution...\n");
         // Measure pure computation time only
         clock_gettime(CLOCK_MONOTONIC, &start);
-        conv2d_omp_parallel(f, H, W, g, kH, kW, parallel_output);
+        conv2d_omp_blocked(f, H, W, g, kH, kW, parallel_output);
         clock_gettime(CLOCK_MONOTONIC, &end);
         parallel_time = get_time_diff(start, end);
         printf("Parallel computation time: %.6f seconds\n", parallel_time);
