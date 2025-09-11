@@ -201,7 +201,7 @@ We utilize the node time data collected in the appendix and combine it with the 
 
 #### 5.2.1 Chart 1 
 
-![a6fe95153b86db6cf349281c5f7598f2](.\244.png)
+![a6fe95153b86db6cf349281c5f7598f2](244.png)
 
 The above figure shows the variation in speedup ratio for different input matrices (10 x 10, 10000 x 1000) as the number of threads increases, under a fixed kernel (3x3). Blue represents the ideal speedup ratio, red represents 10 x 10, and yellow represents 10000 x 10000. The horizontal axis denotes the number of threads, and the vertical axis denotes the speedup ratio.
 
@@ -215,7 +215,7 @@ In this set of experiments, we attempted to scale the input matrix size to 100,0
 
 #### 5.2.2 Chart 2
 
-![a6fe95153b86db6cf349281c5f7598f2](.\245.png)
+![a6fe95153b86db6cf349281c5f7598f2](245.png)
 
 The figure above shows the variation in acceleration ratio for different kernels (10 x 10, 100 x 100, 999 x 999) as the number of threads increases, using a fixed input matrix (1000 x 1000). Green represents the ideal acceleration ratio, blue represents the 10 x 10 kernel, red represents the 100 x 100 kernel, and yellow represents 999 x 999. The horizontal axis denotes the number of threads, while the vertical axis represents the speedup ratio.
 
@@ -512,3 +512,4 @@ This project demonstrated the design and evaluation of a parallel 2D convolution
 | 126  | 0.0134  | 0.50588   | 40.20391    |
 | 127  | 0.01472 | 0.5142    | 39.19099    |
 | 128  | 0.01448 | 0.51656   | 39.28866    |
+
