@@ -92,8 +92,6 @@ int main(int argc, char **argv) {
         omp_set_num_threads(num_threads);
     }
     
-    printf("OpenMP running with %d threads\n", omp_get_max_threads());
-    
     // Variables for arrays
     float **f = NULL, **g = NULL, **output = NULL;
     int f_rows, f_cols, g_rows, g_cols;
@@ -185,7 +183,7 @@ int main(int argc, char **argv) {
     
     // Perform convolution based on mode
     if (use_serial || compare_mode) {
-        printf("Running serial convolution...\n");
+        printf("Running serial convolution (single-threaded)...\n");
         // Measure pure computation time only
         clock_gettime(CLOCK_MONOTONIC, &start);
         conv2d_serial(f, H, W, g, kH, kW, output);
@@ -203,10 +201,10 @@ int main(int argc, char **argv) {
         // Allocate separate output for parallel version in compare mode
         float **parallel_output = compare_mode ? allocate_2d_array(H, W) : output;
         
-        printf("Running parallel convolution...\n");
+        printf("Running parallel convolution with %d threads...\n", omp_get_max_threads());
         // Measure pure computation time only
         clock_gettime(CLOCK_MONOTONIC, &start);
-        conv2d_omp_parallel(f, H, W, g, kH, kW, parallel_output);
+        conv2d_omp_blocked(f, H, W, g, kH, kW, parallel_output);
         clock_gettime(CLOCK_MONOTONIC, &end);
         parallel_time = get_time_diff(start, end);
         printf("Parallel computation time: %.6f seconds\n", parallel_time);

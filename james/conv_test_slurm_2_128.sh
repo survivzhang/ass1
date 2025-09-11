@@ -5,7 +5,7 @@
 #SBATCH --error=conv_test_2_128.err
 #SBATCH --cpus-per-task=64
 #SBATCH --time=01:00:00
-#SBATCH --mem=8G
+#SBATCH --mem=32G
 #SBATCH --partition=cits3402
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=zzcnhy@gmail.com
@@ -14,14 +14,15 @@ echo "=== 2D Convolution Performance Test (Threads 2-128) ==="
 echo "Job started at: $(date)"
 echo "Node: $(hostname)"
 
-# Test parameters - will be read from input files
-# Use single thread baseline from previous test
+# Test parameters
+MATRIX_SIZE=1000
+KERNEL_SIZE=3
 BASELINE_TIME=0.031755
 
 echo ""
 echo "=== Test Configuration ==="
-echo "Input file: input.txt"
-echo "Kernel file: kernel.txt"
+echo "Matrix size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
+echo "Kernel size: ${KERNEL_SIZE}x${KERNEL_SIZE}"
 echo "Testing threads: 2-128"
 echo "Baseline time (1 thread): ${BASELINE_TIME}s"
 
@@ -39,7 +40,7 @@ for threads in $(seq 2 128); do
     export OMP_NUM_THREADS=$threads
     
     # Run the convolution test and capture the computation time from program output
-    output=$(./conv_test -f input.txt -g kernel.txt -p 2>&1)
+    output=$(./conv_test -H $MATRIX_SIZE -W $MATRIX_SIZE -h $KERNEL_SIZE -w $KERNEL_SIZE -p 2>&1)
     
     # Extract computation time from program output
     comp_time=$(echo "$output" | grep "Parallel computation time:" | awk '{print $4}')
@@ -56,8 +57,8 @@ done
 
 echo ""
 echo "=== Performance Analysis Summary (Threads 2-128) ==="
-echo "Input file: input.txt"
-echo "Kernel file: kernel.txt"
+echo "Matrix size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
+echo "Kernel size: ${KERNEL_SIZE}x${KERNEL_SIZE}"
 echo "Thread Range: 2-128"
 echo "Baseline: ${BASELINE_TIME}s"
 echo ""
