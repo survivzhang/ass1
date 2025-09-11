@@ -17,13 +17,15 @@ echo "Node: $(hostname)"
 echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
 # Test parameters
-MATRIX_SIZE=1000
-KERNEL_SIZE=3
+MATRIX_HEIGHT=1000
+MATRIX_WIDTH=2000
+KERNEL_HEIGHT=3
+KERNEL_WIDTH=5
 
 echo ""
 echo "=== Test Configuration ==="
-echo "Matrix size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
-echo "Kernel size: ${KERNEL_SIZE}x${KERNEL_SIZE}"
+echo "Matrix size: ${MATRIX_HEIGHT}x${MATRIX_WIDTH}"
+echo "Kernel size: ${KERNEL_HEIGHT}x${KERNEL_WIDTH}"
 echo "Available CPUs: $SLURM_CPUS_PER_TASK"
 
 # Calculate maximum threads (CPU count * 2)
@@ -35,7 +37,7 @@ echo "=== Running Built-in Performance Analysis ==="
 echo "Using program's built-in analysis function (-a parameter)"
 
 # Run the built-in performance analysis and save to file
-./conv_test -H $MATRIX_SIZE -W $MATRIX_SIZE -h $KERNEL_SIZE -w $KERNEL_SIZE -a > performance_results.txt
+./conv_test -H $MATRIX_HEIGHT -W $MATRIX_WIDTH -h $KERNEL_HEIGHT -w $KERNEL_WIDTH -a > performance_results.txt
 
 
 
