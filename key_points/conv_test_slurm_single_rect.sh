@@ -16,8 +16,8 @@ echo "Node: $(hostname)"
 echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
 # Test parameters for rectangular matrix
-MATRIX_HEIGHT=10000
-MATRIX_WIDTH=1000
+MATRIX_HEIGHT=2000
+MATRIX_WIDTH=2000
 KERNEL_HEIGHT=999
 KERNEL_WIDTH=999
 

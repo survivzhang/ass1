@@ -8,7 +8,7 @@
 #SBATCH --mem=128G
 #SBATCH --partition=cits3402
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=jzguo99@outlook.com
+#SBATCH --mail-user=zzcnhy@gmail.com
 
 echo "=== 2D Convolution Performance Test (Threads 21-30) ==="
 echo "Job started at: $(date)"
