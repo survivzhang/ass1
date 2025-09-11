@@ -15,17 +15,14 @@ echo "Job started at: $(date)"
 echo "Node: $(hostname)"
 echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
-# Test parameters
-MATRIX_SIZE=100000
-KERNEL_SIZE=3
-
+# Test parameters - will be read from input files
 # Use single thread baseline from previous test
 BASELINE_TIME=330.950020
 
 echo ""
 echo "=== Test Configuration ==="
-echo "Matrix size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
-echo "Kernel size: ${KERNEL_SIZE}x${KERNEL_SIZE}"
+echo "Input file: input.txt"
+echo "Kernel file: kernel.txt"
 echo "Testing threads: 65-128"
 echo "Baseline time (1 thread): ${BASELINE_TIME}s"
 
@@ -43,8 +40,7 @@ for threads in $(seq 65 128); do
     export OMP_NUM_THREADS=$threads
     
     # Run the convolution test and capture the computation time from program output
-    output=$(./conv_test -H $MATRIX_SIZE -W $MATRIX_SIZE -h $KERNEL_SIZE -w $KERNEL_SIZE \
-        -f input_test_65_128.txt -g kernel_test_65_128.txt -o output_test_65_128.txt -p 2>&1)
+    output=$(./conv_test -f input.txt -g kernel.txt -p 2>&1)
     
     # Extract computation time from program output
     comp_time=$(echo "$output" | grep "Parallel computation time:" | awk '{print $4}')
@@ -61,8 +57,8 @@ done
 
 echo ""
 echo "=== Performance Analysis Summary (Threads 65-128) ==="
-echo "Matrix Size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
-echo "Kernel Size: ${KERNEL_SIZE}x${KERNEL_SIZE}"
+echo "Input file: input.txt"
+echo "Kernel file: kernel.txt"
 echo "Thread Range: 65-128"
 echo "Baseline: ${BASELINE_TIME}s"
 echo ""
