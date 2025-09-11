@@ -4,8 +4,8 @@
 #SBATCH --output=conv_test_single.out
 #SBATCH --error=conv_test_single.err
 #SBATCH --cpus-per-task=1
-#SBATCH --time=02:00:00
-#SBATCH --mem=128G
+#SBATCH --time=01:00:00
+#SBATCH --mem=2G
 #SBATCH --partition=cits3402
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=jzguo99@outlook.com
@@ -16,7 +16,7 @@ echo "Node: $(hostname)"
 echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
 # Test parameters
-MATRIX_SIZE=100000
+MATRIX_SIZE=1000
 KERNEL_SIZE=3
 
 echo ""

@@ -1,29 +1,28 @@
 #!/bin/bash
 
-#SBATCH --job-name=conv_test_2_10
-#SBATCH --output=conv_test_2_10.out
-#SBATCH --error=conv_test_2_10.err
-#SBATCH --cpus-per-task=10
-#SBATCH --time=02:00:00
-#SBATCH --mem=128G
+#SBATCH --job-name=conv_test_2_128
+#SBATCH --output=conv_test_2_128.out
+#SBATCH --error=conv_test_2_128.err
+#SBATCH --cpus-per-task=64
+#SBATCH --time=01:00:00
+#SBATCH --mem=8G
 #SBATCH --partition=cits3402
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=zzcnhy@gmail.com
 
-echo "=== 2D Convolution Performance Test (Threads 2-10) ==="
+echo "=== 2D Convolution Performance Test (Threads 2-128) ==="
 echo "Job started at: $(date)"
 echo "Node: $(hostname)"
-echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
 # Test parameters - will be read from input files
 # Use single thread baseline from previous test
-BASELINE_TIME=330.95
+BASELINE_TIME=0.031755
 
 echo ""
 echo "=== Test Configuration ==="
 echo "Input file: input.txt"
 echo "Kernel file: kernel.txt"
-echo "Testing threads: 2-10"
+echo "Testing threads: 2-128"
 echo "Baseline time (1 thread): ${BASELINE_TIME}s"
 
 # Array to store timing results for analysis
@@ -33,10 +32,10 @@ declare -a efficiency_values
 declare -a expected_times
 
 echo ""
-echo "=== Thread Performance Analysis (2-10 threads) ==="
+echo "=== Thread Performance Analysis (2-128 threads) ==="
 
-# Test thread counts from 2 to 10
-for threads in $(seq 2 10); do
+# Test thread counts from 2 to 128
+for threads in $(seq 2 128); do
     export OMP_NUM_THREADS=$threads
     
     # Run the convolution test and capture the computation time from program output
@@ -56,27 +55,27 @@ for threads in $(seq 2 10); do
 done
 
 echo ""
-echo "=== Performance Analysis Summary (Threads 2-10) ==="
+echo "=== Performance Analysis Summary (Threads 2-128) ==="
 echo "Input file: input.txt"
 echo "Kernel file: kernel.txt"
-echo "Thread Range: 2-10"
+echo "Thread Range: 2-128"
 echo "Baseline: ${BASELINE_TIME}s"
 echo ""
 printf "%-8s %-12s %-12s %-10s %-12s\n" "Threads" "Computing(s)" "Expected(s)" "Speedup" "Efficiency(%)"
 printf "%-8s %-12s %-12s %-10s %-12s\n" "-------" "--------" "--------" "-------" "------------"
 
-for threads in $(seq 2 10); do
+for threads in $(seq 2 128); do
     printf "%-8s %-12.5f %-12.5f %-10.5f %-12.5f\n" "$threads" "${computing_times[$threads]}" "${expected_times[$threads]}" "${speedup_values[$threads]}" "${efficiency_values[$threads]}"
 done
 
-# Find optimal thread count in 2-10 range
+# Find optimal thread count in 2-128 range
 echo ""
-echo "=== Optimization Analysis (Threads 2-10) ==="
+echo "=== Optimization Analysis (Threads 2-128) ==="
 optimal_threads=2
 best_speedup=0.0
 best_efficiency_threads=2
 
-for threads in $(seq 2 10); do
+for threads in $(seq 2 128); do
     current_speedup=${speedup_values[$threads]}
     current_efficiency=${efficiency_values[$threads]}
     
@@ -92,14 +91,14 @@ for threads in $(seq 2 10); do
     fi
 done
 
-echo "Optimal thread count for maximum speedup (2-10): $optimal_threads threads (${best_speedup}x speedup)"
-echo "Best thread count with >80% efficiency (2-10): $best_efficiency_threads threads"
-echo "Best computing time (2-10): ${computing_times[$optimal_threads]}s"
+echo "Optimal thread count for maximum speedup (2-128): $optimal_threads threads (${best_speedup}x speedup)"
+echo "Best thread count with >80% efficiency (2-128): $best_efficiency_threads threads"
+echo "Best computing time (2-128): ${computing_times[$optimal_threads]}s"
 
 # Send output file as email attachment
 echo ""
-echo "Sending results (2-10 threads) via email..."
-mail -s "Convolution Performance Test Results 2-10 Threads - Job $SLURM_JOB_ID" -a conv_test_2_10.out jzguo99@outlook.com < /dev/null
+echo "Sending results (2-128 threads) via email..."
+mail -s "Convolution Performance Test Results 2-128 Threads - Job $SLURM_JOB_ID" -a conv_test_2_128.out zzcnhy@gmail.com < /dev/null
 
 echo ""
-echo "Thread range 2-10 test completed successfully!"
+echo "Thread range 2-128 test completed successfully!"

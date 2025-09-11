@@ -247,7 +247,7 @@ This project demonstrated the design and evaluation of a parallel 2D convolution
 
 ## 7. Appendix
 
-### 7.1 Computing times table with stable kernel(3 x 3)
+### 7.1 Computing times table with stable kernel(3 x 3)input change:
 
 |      | 100 x 100 | 10000 x 10000 |
 | ---- | --------- | ------------- |
@@ -380,7 +380,7 @@ This project demonstrated the design and evaluation of a parallel 2D convolution
 | 127  | 0.0039    | 0.07423       |
 | 128  | 0.00383   | 0.06288       |
 
-### 7.2 Computing times table with stable input matrix (1000 x 1000) 
+### 7.2 Computing times table with stable input matrix (1000 x 1000) Kernal change:
 
 |      | 10 x 10 | 100 x 100 | 999 x 999   |
 | ---- | ------- | --------- | ----------- |
