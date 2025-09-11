@@ -38,7 +38,3 @@ echo "Using program's built-in analysis function (-a parameter)"
 
 # Run the built-in performance analysis and save to file
 ./conv_test -H $MATRIX_HEIGHT -W $MATRIX_WIDTH -h $KERNEL_HEIGHT -w $KERNEL_WIDTH -a > performance_results.txt
-
-
-
-
