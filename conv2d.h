@@ -26,10 +26,6 @@ int write_array_to_file(const char *filename, float **array, int rows, int cols)
 // Random array generation
 void generate_random_array(float **array, int rows, int cols);
 
-// OpenMP configuration utilities
-void configure_omp_settings(int num_threads);
-int get_omp_thread_count();
-
 // Performance analysis utilities
 void performance_analysis_threads(float **f, int H, int W, float **g, int kH, int kW);
 

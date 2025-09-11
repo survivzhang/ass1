@@ -51,10 +51,44 @@ void conv2d_omp_blocked(float **f, int H, int W, float **g, int kH, int kW, floa
     int pad_top = (kH - 1) / 2;
     int pad_left = (kW - 1) / 2;
     
-    // Calculate optimal block size based on matrix dimensions
-    int block_size = (H > 100) ? 16 : 8;  // Larger blocks for bigger matrices
+    // Calculate optimal block size based on matrix dimensions, kernel size, and thread count
+    int num_threads = omp_get_max_threads();
+    int kernel_ops = kH * kW;  // Operations per output pixel
+    int block_size;
     
-    // Parallelize over output rows with dynamic scheduling and larger chunks
+    // Base block size based on matrix dimensions
+    if (H < 100) {
+        block_size = 8;
+    } else if (H < 500) {
+        block_size = 16;
+    } else if (H < 2000) {
+        block_size = 32;
+    } else {
+        block_size = 64;
+    }
+    
+    // Adjust block size based on kernel complexity
+    if (kernel_ops <= 9) {
+        block_size = block_size;
+    } else if (kernel_ops <= 25) {
+        block_size = (block_size / 2 > 2) ? block_size / 2 : 2;
+    } else if (kernel_ops <= 49) {
+        block_size = (block_size / 3 > 1) ? block_size / 3 : 1;
+    } else {
+        block_size = (block_size / 4 > 1) ? block_size / 4 : 1;
+    }
+    
+    // Ensure minimum block size
+    if (block_size < 1) block_size = 1;
+    
+    // Adjust for thread count and add upper bound
+    if (num_threads > 16) {
+        block_size = block_size * 2;
+    }
+    block_size = (block_size < H / (num_threads * 2)) ? block_size : H / (num_threads * 2);
+    if (block_size < 1) block_size = 1;
+    
+    // Parallelize over output rows with dynamic scheduling
     #pragma omp parallel for schedule(dynamic, block_size) \
         shared(f, g, output, H, W, kH, kW, pad_top, pad_left)
     for (int i = 0; i < H; i++) {
@@ -216,24 +250,13 @@ void generate_random_array(float **array, int rows, int cols) {
 }
 
 
-/**
- * Configure OpenMP settings for optimal performance
- * Inspired by omp.cpp's thread configuration approach
- */
-void configure_omp_settings(int num_threads) {
-    #ifdef _OPENMP
-    omp_set_num_threads(num_threads);
-    omp_set_schedule(omp_sched_dynamic, 1);
-    printf("OpenMP configured with %d threads\n", num_threads);
-    #endif
-}
 
 /**
  * Performance analysis function to test different thread counts (1 to max threads)
  * Inspired by omp.cpp's performance testing approach
  */
 void performance_analysis_threads(float **f, int H, int W, float **g, int kH, int kW) {
-    int max_threads = get_omp_thread_count();
+    int max_threads = omp_get_max_threads();
     printf("\n=== Thread Performance Analysis (1-%d threads) ===\n", max_threads);
     printf("Matrix size: %dx%d, Kernel size: %dx%d\n", H, W, kH, kW);
     printf("Testing thread counts from 1 to %d\n\n", max_threads);
@@ -243,8 +266,7 @@ void performance_analysis_threads(float **f, int H, int W, float **g, int kH, in
     int best_threads = 1;
     
     for (int threads = 1; threads <= max_threads; threads++) {
-        // Configure threads
-        configure_omp_settings(threads);
+        omp_set_num_threads(threads);
         
         // Allocate output array
         float **output = allocate_2d_array(H, W);
@@ -286,16 +308,6 @@ void performance_analysis_threads(float **f, int H, int W, float **g, int kH, in
     printf("\nOptimal thread count: %d (%.6f seconds)\n", best_threads, best_time);
 }
 
-/**
- * Get the number of available OpenMP threads
- */
-int get_omp_thread_count() {
-    #ifdef _OPENMP
-    return omp_get_max_threads();
-    #else
-    return 1;
-    #endif
-}
 
 /**
  * Calculate time difference in seconds

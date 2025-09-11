@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
     
     // Perform convolution based on mode
     if (use_serial || compare_mode) {
-        printf("Running serial convolution...\n");
+        printf("Running serial convolution (single-threaded)...\n");
         // Measure pure computation time only
         clock_gettime(CLOCK_MONOTONIC, &start);
         conv2d_serial(f, H, W, g, kH, kW, output);
