@@ -195,68 +195,320 @@ Performance was measured on **Kaya HPC** using different input sizes and thread 
 * **Parallel efficiency (E = S / N_threads).**
 * **Scalability trends** with input size and kernel size.
 
-### 5.2 Figures and tables:
+### 5.2 Figures and charts:
 
-#### 5.2.1 Table of running times
+We utilize the node time data collected in the appendix and combine it with the aforementioned formula to calculate speedup and efficiency. The following two charts illustrate how speedup varies under different conditions.
 
-| Array  Size (H x W) | Threads | Serial Time (s) | Parallel Time (s) |
-| ------------------- | ------- | --------------- | ----------------- |
-| 512 x 512           | 1       | 0.007988        | 0.007981          |
-| 512 x 512           | 2       | 0.007979        | 0.004161          |
-| 512 x 512           | 4       | 0.007969        | 0.002206          |
-| 512 x 512           | 8       | 0.007965        | 0.001215          |
-| 512 x 512           | 16      | 0.007986        | 0.000879          |
-| 1024 x 1024         | 1       | 0.032041        | 0.031686          |
-| 1024 x 1024         | 2       | 0.031841        | 0.016522          |
-| 1024 x 1024         | 4       | 0.032043        | 0.008337          |
-| 1024 x 1024         | 8       | 0.031921        | 0.004344          |
-| 1024 x 1024         | 16      | 0.031807        | 0.002426          |
-| 2048 x 2048         | 1       | 0.13046         | 0.129714          |
-| 2048 x 2048         | 2       | 0.130355        | 0.065527          |
-| 2048 x 2048         | 4       | 0.130635        | 0.033267          |
-| 2048 x 2048         | 8       | 0.130189        | 0.016769          |
-| 2048 x 2048         | 16      | 0.130199        | 0.008872          |
+#### 5.2.1 Chart 1 
 
-This data table records the runtime of serial and parallel computations under different thread counts (1, 2, 4, 8, 16) and matrix sizes (512 x 512, 1024 x 1024, 2048 x 2048). The following conclusions can be drawn:
+![a6fe95153b86db6cf349281c5f7598f2](.\244.png)
 
-1. For the same matrix size, increasing the number of threads from 1 to 16 significantly reduces parallel processing time, demonstrating the effectiveness of parallelization.
-2. As the matrix size increases from 512 x 512 to 2048 x 2048, both serial and parallel execution times increase substantially. This aligns with expectations, as the data volume processed grows quadratically.
+The above figure shows the variation in speedup ratio for different input matrices (10 x 10, 10000 x 1000) as the number of threads increases, under a fixed kernel (3x3). Blue represents the ideal speedup ratio, red represents 10 x 10, and yellow represents 10000 x 10000. The horizontal axis denotes the number of threads, and the vertical axis denotes the speedup ratio.
 
-#### 5.2.2  Speedup graph
+The red curve (10x10) and yellow curve (10000x10000) in the chart clearly demonstrate the significant impact of input matrix size on the speedup ratio:
 
-<img src="C:\Users\13203\AppData\Roaming\Typora\typora-user-images\image-20250907153804943.png" alt="image-20250907153804943" style="zoom:80%;" />
+​      • Small matrix (10x10): The speedup ratio of the red curve is extremely low, showing almost no improvement even after increasing the number of threads, remaining close to 1. 
 
-The figure above illustrates the performance improvement of parallel implementation over serial implementation using a 2048 x 2048 input matrix size as an example. The chart displays two lines: one represents the ideal speedup ratio (a straight line originating from the origin), while the other shows the actual measured speedup ratio. From this, we observe:
+​      • Large Matrix (10000x10000): The yellow curve achieves a good speedup ratio initially. However, as the number of threads increases, the speedup ratio begins to fluctuate dramatically after reaching approximately 50, eventually entering a plateau phase. 
 
-• Linear acceleration: The measured acceleration ratio curve closely follows the ideal curve, particularly with fewer threads (1, 2, 4). This indicates near-perfect parallelization at these test points, where each additional thread delivers nearly proportional performance gains.
+In this set of experiments, we attempted to scale the input matrix size to 100,000 × 100,000. At this scale, the computational time complexity reached **10¹⁰**, which represents the **upper limit** of what can be run within node memory.
 
-• Near-perfect speedup: At 8 threads, the actual speedup reaches 7.76x. This indicates the program effectively utilizes multi-core resources with minimal parallelization overhead.
+#### 5.2.2 Chart 2
 
-• Emergence of performance bottlenecks: At 16 threads, the speedup is 14.68x. While still very high, it begins to fall slightly below the ideal 16x acceleration. This typically occurs because parallelization overhead (such as thread creation, synchronization, or scheduling) starts to become significant, or due to cache contention.
+![a6fe95153b86db6cf349281c5f7598f2](.\245.png)
 
-![image-20250908160228115](C:\Users\13203\AppData\Roaming\Typora\typora-user-images\image-20250908160228115.png)
+The figure above shows the variation in acceleration ratio for different kernels (10 x 10, 100 x 100, 999 x 999) as the number of threads increases, using a fixed input matrix (1000 x 1000). Green represents the ideal acceleration ratio, blue represents the 10 x 10 kernel, red represents the 100 x 100 kernel, and yellow represents 999 x 999. The horizontal axis denotes the number of threads, while the vertical axis represents the speedup ratio.
 
-The figure above illustrates the variation in the speedup across different matrix sizes and thread counts. Red indicates the trend of speedups, while blue represents the trend of thread counts. The horizontal axis denotes matrix sizes, and the vertical axis shows the corresponding speedup value. The graph reveals that as the number of parallel threads increases, the speedup for large matrices approaches the ideal speedup. This demonstrates that parallelization delivers more significant performance gains when handling large-scale computational tasks.
+The blue (10x10), red (100x100), and yellow (999x999) curves in the chart clearly demonstrate the significant impact of kernel size on the speedup ratio:
 
-#### 5.2.3 Efficiency graph
+• Small kernel (10x10): The acceleration ratio of the blue curve is very low, and it exhibits sharp fluctuations after reaching a certain number of threads. This indicates that when the kernel size is very small, the computational load is relatively minimal.
 
-#### ![image-20250908160137981](C:\Users\13203\AppData\Roaming\Typora\typora-user-images\image-20250908160137981.png)
+• Medium kernel (100x100) and large kernel (999x999) approaching input matrix size: The red and yellow curves achieve excellent acceleration ratios initially, aligning with the ideal acceleration ratio curve. However, after reaching a certain acceleration ratio (around 60), both curves plateau, with the acceleration ratio no longer significantly improving with increased thread count.
 
-The figure above illustrates efficiency changes across different matrix sizes and thread counts. Red indicates efficiency trends, blue represents thread count trends, the horizontal axis denotes matrix sizes, and the vertical axis shows corresponding efficiency data. It reveals that:
+#### 5.2.3 Reason analysis
 
-• Efficiency decreases with increasing thread count: For all matrix sizes, efficiency declines as the number of threads increases. Under ideal conditions, efficiency should remain around 100%. However, in practice, inter-thread overhead reduces efficiency. For example, at 16 threads, efficiency drops below 60%. This indicates that more threads are not always better; beyond a certain threshold, excessive coordination overhead diminishes each thread's contribution.
+From the two charts above, it is evident that both the input matrix size and kernel size influence the thread acceleration ratio. We can summarize the causes of these variations as follows:
 
-• Larger matrices exhibit higher efficiency: For the same number of threads, processing large matrices (e.g., 2048 x 2048) demonstrates significantly higher efficiency than smaller matrices (e.g., 512 x 512). This validates the principle that “parallelization is more suitable for large-scale computational problems.” When computational volume is sufficiently large, the proportion of overhead time relative to total runtime becomes relatively small, resulting in higher overall efficiency.
+1. Trade-off between task granularity and parallelization overhead
+
+• Fine-grained tasks (low granularity): When input matrices or kernels are very small (e.g., 10x10), resulting in minimal overall computation, dividing tasks into multiple threads for parallel processing becomes inefficient. In such cases, the overhead of thread creation, management, scheduling, and synchronization may far outweigh the benefits of parallel computation. Consequently, the speedup ratio is very low, potentially even below 1 (i.e., parallel processing is slower than serial), and the curve exhibits significant fluctuations.
+
+• Coarse-grained tasks (high granularity): When the input matrix or kernel size is large, resulting in substantial computational load, parallelization fully leverages its advantages. The computational gains far outweigh the parallelization overhead, enabling the speedup ratio to increase significantly with the number of threads.
+
+2. Hardware Resource Bottlenecks
+
+• Acceleration Ratio Saturation: In both scenarios, we observe the actual acceleration ratio curve plateauing after reaching a certain value. This typically indicates that the number of threads has hit the physical limit of the hardware, such as the number of CPU cores. Beyond this threshold, adding more threads yields no performance gains because all computational resources (e.g., CPU cores) are already occupied. To manage excessive threads, the system must perform frequent context switches, which actually reduces efficiency.
 
 ---
 
-## 6. Testing and Validation
-
-
-
----
-
-## 7. Conclusion
+## 6. Conclusion
 
 This project demonstrated the design and evaluation of a parallel 2D convolution in C with OpenMP. By parallelising the outer loops over output pixels and optimising memory layout, substantial speedups were achieved on multi-core systems. Cache efficiency and scheduling strategy played important roles in scalability. The results confirm that OpenMP parallelisation provides clear benefits for computationally intensive tasks like convolution, making it well-suited for large-scale problems encountered in image processing and deep learning.
 
+## 7. Appendix
+
+### 7.1 Computing times table with stable kernel(3 x 3)
+
+|      | 100 x 100 | 10000 x 10000 |
+| ---- | --------- | ------------- |
+| 1    | 0.00032   | 3.279194      |
+| 2    | 0.00026   | 1.64984       |
+| 3    | 0.00023   | 1.10214       |
+| 4    | 0.00023   | 0.82737       |
+| 5    | 0.00028   | 0.66256       |
+| 6    | 0.00027   | 0.55235       |
+| 7    | 0.00033   | 0.47387       |
+| 8    | 0.0003    | 0.4149        |
+| 9    | 0.00035   | 0.369         |
+| 10   | 0.00036   | 0.33208       |
+| 11   | 0.00038   | 0.30299       |
+| 12   | 0.00041   | 0.27798       |
+| 13   | 0.00044   | 0.25703       |
+| 14   | 0.00043   | 0.23876       |
+| 15   | 0.00048   | 0.22327       |
+| 16   | 0.00051   | 0.20942       |
+| 17   | 0.00053   | 0.19757       |
+| 18   | 0.00056   | 0.18653       |
+| 19   | 0.00055   | 0.17697       |
+| 20   | 0.00058   | 0.16816       |
+| 21   | 0.00062   | 0.16028       |
+| 22   | 0.00067   | 0.15213       |
+| 23   | 0.00066   | 0.14676       |
+| 24   | 0.0007    | 0.14061       |
+| 25   | 0.00081   | 0.13514       |
+| 26   | 0.00516   | 0.13009       |
+| 27   | 0.00076   | 0.12562       |
+| 28   | 0.00085   | 0.12116       |
+| 29   | 0.00086   | 0.12106       |
+| 30   | 0.01063   | 0.11749       |
+| 31   | 0.00983   | 0.11004       |
+| 32   | 0.00094   | 0.11033       |
+| 33   | 0.01011   | 0.10734       |
+| 34   | 0.00992   | 0.10436       |
+| 35   | 0.01304   | 0.1018        |
+| 36   | 0.01446   | 0.09918       |
+| 37   | 0.01027   | 0.09664       |
+| 38   | 0.01025   | 0.09445       |
+| 39   | 0.01025   | 0.09365       |
+| 40   | 0.01262   | 0.09134       |
+| 41   | 0.00641   | 0.08797       |
+| 42   | 0.01479   | 0.08919       |
+| 43   | 0.01277   | 0.09012       |
+| 44   | 0.01063   | 0.09026       |
+| 45   | 0.01014   | 0.09063       |
+| 46   | 0.01318   | 0.08394       |
+| 47   | 0.01596   | 0.09096       |
+| 48   | 0.01429   | 0.08041       |
+| 49   | 0.01613   | 0.0794        |
+| 50   | 0.01219   | 0.08777       |
+| 51   | 0.01527   | 0.08428       |
+| 52   | 0.01384   | 0.08606       |
+| 53   | 0.01109   | 0.0718        |
+| 54   | 0.03551   | 0.08355       |
+| 55   | 0.01502   | 0.07048       |
+| 56   | 0.02505   | 0.07275       |
+| 57   | 0.01494   | 0.07425       |
+| 58   | 0.01542   | 0.07751       |
+| 59   | 0.01728   | 0.06643       |
+| 60   | 0.01521   | 0.06957       |
+| 61   | 0.01547   | 0.0744        |
+| 62   | 0.01535   | 0.07337       |
+| 63   | 0.0163    | 0.07334       |
+| 64   | 0.02017   | 0.0758        |
+| 65   | 0.00192   | 0.07689       |
+| 66   | 0.00197   | 0.05888       |
+| 67   | 0.0021    | 0.07457       |
+| 68   | 0.00197   | 0.05997       |
+| 69   | 0.00197   | 0.08272       |
+| 70   | 0.00212   | 0.05896       |
+| 71   | 0.00205   | 0.07408       |
+| 72   | 0.00204   | 0.06435       |
+| 73   | 0.00226   | 0.09333       |
+| 74   | 0.00224   | 0.06699       |
+| 75   | 0.00236   | 0.06511       |
+| 76   | 0.00234   | 0.07206       |
+| 77   | 0.00236   | 0.08205       |
+| 78   | 0.00233   | 0.05939       |
+| 79   | 0.00246   | 0.07759       |
+| 80   | 0.00228   | 0.06296       |
+| 81   | 0.00224   | 0.09054       |
+| 82   | 0.00243   | 0.06597       |
+| 83   | 0.00242   | 0.08363       |
+| 84   | 0.0025    | 0.06571       |
+| 85   | 0.00247   | 0.08367       |
+| 86   | 0.00285   | 0.06135       |
+| 87   | 0.00253   | 0.09186       |
+| 88   | 0.00256   | 0.06149       |
+| 89   | 0.00268   | 0.081         |
+| 90   | 0.003     | 0.06049       |
+| 91   | 0.00268   | 0.07932       |
+| 92   | 0.00276   | 0.05962       |
+| 93   | 0.00283   | 0.07138       |
+| 94   | 0.00272   | 0.06136       |
+| 95   | 0.00297   | 0.08106       |
+| 96   | 0.00265   | 0.05999       |
+| 97   | 0.0029    | 0.07681       |
+| 98   | 0.00288   | 0.06102       |
+| 99   | 0.00308   | 0.07991       |
+| 100  | 0.00302   | 0.0623        |
+| 101  | 0.00312   | 0.063         |
+| 102  | 0.00317   | 0.08298       |
+| 103  | 0.00309   | 0.07026       |
+| 104  | 0.00318   | 0.06078       |
+| 105  | 0.0029    | 0.07853       |
+| 106  | 0.00359   | 0.07609       |
+| 107  | 0.00343   | 0.08221       |
+| 108  | 0.00353   | 0.0618        |
+| 109  | 0.00324   | 0.0884        |
+| 110  | 0.00317   | 0.06019       |
+| 111  | 0.00369   | 0.06677       |
+| 112  | 0.00318   | 0.06516       |
+| 113  | 0.00341   | 0.07977       |
+| 114  | 0.00346   | 0.0838        |
+| 115  | 0.00361   | 0.06454       |
+| 116  | 0.00347   | 0.08257       |
+| 117  | 0.00372   | 0.06946       |
+| 118  | 0.00386   | 0.0881        |
+| 119  | 0.00375   | 0.06436       |
+| 120  | 0.00368   | 0.07518       |
+| 121  | 0.00384   | 0.06441       |
+| 122  | 0.0044    | 0.08521       |
+| 123  | 0.00387   | 0.08289       |
+| 124  | 0.00347   | 0.07513       |
+| 125  | 0.00396   | 0.06294       |
+| 126  | 0.00421   | 0.06937       |
+| 127  | 0.0039    | 0.07423       |
+| 128  | 0.00383   | 0.06288       |
+
+### 7.2 Computing times table with stable input matrix (1000 x 1000) 
+
+|      | 10 x 10 | 100 x 100 | 999 x 999   |
+| ---- | ------- | --------- | ----------- |
+| 1    | 0.31505 | 29.583378 | 2412.849565 |
+| 2    | 0.15923 | 14.79584  | 1212.779748 |
+| 3    | 0.10596 | 9.84571   | 803.7125524 |
+| 4    | 0.07969 | 7.42299   | 606.8031489 |
+| 5    | 0.06391 | 5.92778   | 487.2750408 |
+| 6    | 0.05323 | 4.96975   | 406.2952863 |
+| 7    | 0.04605 | 4.24078   | 350.9441123 |
+| 8    | 0.04013 | 3.74512   | 305.9941518 |
+| 9    | 0.03581 | 3.2975    | 269.2497768 |
+| 10   | 0.03234 | 2.98645   | 245.0650854 |
+| 11   | 0.02956 | 2.70421   | 221.13645   |
+| 12   | 0.02704 | 2.48195   | 203.09083   |
+| 13   | 0.02495 | 2.28813   | 186.41058   |
+| 14   | 0.02333 | 2.12964   | 173.33074   |
+| 15   | 0.02197 | 1.99753   | 162.86244   |
+| 16   | 0.02057 | 1.86269   | 153.61712   |
+| 17   | 0.01942 | 1.76784   | 144.53223   |
+| 18   | 0.01843 | 1.68457   | 136.81779   |
+| 19   | 0.01758 | 1.57166   | 127.55301   |
+| 20   | 0.01676 | 1.50306   | 122.23649   |
+| 21   | 0.01602 | 1.41897   | 115.59145   |
+| 22   | 0.01542 | 1.37693   | 110.86735   |
+| 23   | 0.01477 | 1.29867   | 105.83253   |
+| 24   | 0.0143  | 1.24625   | 101.00469   |
+| 25   | 0.01375 | 1.20786   | 96.38633    |
+| 26   | 0.0132  | 1.15242   | 93.85034    |
+| 27   | 0.01294 | 1.11799   | 91.04489    |
+| 28   | 0.0125  | 1.06434   | 86.68078    |
+| 29   | 0.01205 | 1.03381   | 84.79224    |
+| 30   | 0.01185 | 1.005     | 81.76532    |
+| 31   | 0.01141 | 0.97538   | 79.36502    |
+| 32   | 0.01115 | 0.94715   | 76.86457    |
+| 33   | 0.01082 | 0.91534   | 74.57801    |
+| 34   | 0.01463 | 0.88962   | 72.00499    |
+| 35   | 0.01058 | 0.86063   | 69.81027    |
+| 36   | 0.01406 | 0.84476   | 67.35703    |
+| 37   | 0.01394 | 0.83162   | 67.003      |
+| 38   | 0.01374 | 0.79843   | 65.1422     |
+| 39   | 0.0135  | 0.796     | 62.60168    |
+| 40   | 0.01334 | 0.76859   | 62.46108    |
+| 41   | 0.01314 | 0.74473   | 60.08773    |
+| 42   | 0.01295 | 0.736     | 59.6579     |
+| 43   | 0.01292 | 0.70575   | 57.67635    |
+| 44   | 0.01283 | 0.70947   | 55.79556    |
+| 45   | 0.01261 | 0.68744   | 55.24932    |
+| 46   | 0.01243 | 0.66597   | 54.94966    |
+| 47   | 0.01623 | 0.6686    | 53.62163    |
+| 48   | 0.01696 | 0.64204   | 52.71994    |
+| 49   | 0.01703 | 0.64903   | 50.8412     |
+| 50   | 0.01194 | 0.62337   | 50.43963    |
+| 51   | 0.01547 | 0.62622   | 49.44915    |
+| 52   | 0.01181 | 0.59683   | 48.55366    |
+| 53   | 0.01167 | 0.5835    | 47.37399    |
+| 54   | 0.01173 | 0.58277   | 46.74516    |
+| 55   | 0.01657 | 0.59272   | 45.83843    |
+| 56   | 0.01653 | 0.55956   | 44.82384    |
+| 57   | 0.02928 | 0.55935   | 44.71371    |
+| 58   | 0.01613 | 0.56495   | 43.6451     |
+| 59   | 0.01646 | 0.53649   | 42.80519    |
+| 60   | 0.0168  | 0.53247   | 42.39941    |
+| 61   | 0.0166  | 0.52679   | 41.74082    |
+| 62   | 0.02111 | 0.50929   | 41.35083    |
+| 63   | 0.0226  | 0.52345   | 41.71799    |
+| 64   | 0.02146 | 0.5047    | 40.06575    |
+| 65   | 0.01327 | 0.51389   | 38.79825    |
+| 66   | 0.01421 | 0.47812   | 39.05572    |
+| 67   | 0.01749 | 0.49988   | 39.38677    |
+| 68   | 0.01314 | 0.48366   | 38.90355    |
+| 69   | 0.01353 | 0.50876   | 38.92412    |
+| 70   | 0.01175 | 0.50559   | 38.76202    |
+| 71   | 0.01559 | 0.51803   | 39.28221    |
+| 72   | 0.01297 | 0.48793   | 38.88389    |
+| 73   | 0.01676 | 0.50761   | 38.80564    |
+| 74   | 0.01268 | 0.48756   | 39.59758    |
+| 75   | 0.01351 | 0.49693   | 38.95485    |
+| 76   | 0.01233 | 0.51238   | 39.08529    |
+| 77   | 0.01397 | 0.48172   | 38.82571    |
+| 78   | 0.01219 | 0.5197    | 38.94892    |
+| 79   | 0.01381 | 0.50508   | 39.39262    |
+| 80   | 0.01398 | 0.48739   | 38.61286    |
+| 81   | 0.01594 | 0.50206   | 38.73497    |
+| 82   | 0.01327 | 0.52035   | 38.71617    |
+| 83   | 0.0166  | 0.51945   | 38.66294    |
+| 84   | 0.01188 | 0.48377   | 38.35401    |
+| 85   | 0.0116  | 0.51758   | 38.63077    |
+| 86   | 0.01888 | 0.52195   | 38.52465    |
+| 87   | 0.01302 | 0.50638   | 39.33662    |
+| 88   | 0.01489 | 0.49141   | 38.44101    |
+| 89   | 0.014   | 0.50886   | 38.50019    |
+| 90   | 0.01187 | 0.51915   | 38.57363    |
+| 91   | 0.01412 | 0.48927   | 38.85552    |
+| 92   | 0.01385 | 0.48883   | 38.55638    |
+| 93   | 0.01344 | 0.51772   | 38.62788    |
+| 94   | 0.01237 | 0.5081    | 38.67674    |
+| 95   | 0.01381 | 0.50747   | 38.64856    |
+| 96   | 0.01304 | 0.50475   | 38.65102    |
+| 97   | 0.01275 | 0.49379   | 38.75076    |
+| 98   | 0.01206 | 0.51747   | 39.20304    |
+| 99   | 0.01361 | 0.4969    | 39.32201    |
+| 100  | 0.01255 | 0.5157    | 39.3265     |
+| 101  | 0.0134  | 0.4876    | 40.21379    |
+| 102  | 0.01246 | 0.5128    | 38.89349    |
+| 103  | 0.01436 | 0.4933    | 39.13646    |
+| 104  | 0.01451 | 0.51183   | 40.83475    |
+| 105  | 0.01344 | 0.4889    | 39.24597    |
+| 106  | 0.01339 | 0.50953   | 39.52455    |
+| 107  | 0.01396 | 0.51885   | 39.14612    |
+| 108  | 0.01373 | 0.50898   | 40.06336    |
+| 109  | 0.01508 | 0.48767   | 38.89345    |
+| 110  | 0.01352 | 0.52189   | 39.75595    |
+| 111  | 0.01405 | 0.4861    | 38.96355    |
+| 112  | 0.01333 | 0.49961   | 39.27591    |
+| 113  | 0.01421 | 0.49422   | 39.19469    |
+| 114  | 0.0129  | 0.51072   | 40.2905     |
+| 115  | 0.01369 | 0.50863   | 40.39425    |
+| 116  | 0.01376 | 0.51939   | 38.8898     |
+| 117  | 0.01332 | 0.52068   | 40.1069     |
+| 118  | 0.01374 | 0.49555   | 40.19949    |
+| 119  | 0.01435 | 0.51832   | 38.68815    |
+| 120  | 0.01328 | 0.49574   | 39.88579    |
+| 121  | 0.01438 | 0.52112   | 39.3283     |
+| 122  | 0.0119  | 0.50037   | 39.36712    |
+| 123  | 0.01798 | 0.51538   | 39.34924    |
+| 124  | 0.01472 | 0.48791   | 39.21592    |
+| 125  | 0.01446 | 0.49888   | 38.9264     |
+| 126  | 0.0134  | 0.50588   | 40.20391    |
+| 127  | 0.01472 | 0.5142    | 39.19099    |
+| 128  | 0.01448 | 0.51656   | 39.28866    |
