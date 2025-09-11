@@ -18,15 +18,14 @@ echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
 # Test parameters
 MATRIX_HEIGHT=1000
-MATRIX_WIDTH=2000
+MATRIX_WIDTH=1000
 KERNEL_HEIGHT=3
-KERNEL_WIDTH=5
+KERNEL_WIDTH=3
 
 echo ""
 echo "=== Test Configuration ==="
 echo "Matrix size: ${MATRIX_HEIGHT}x${MATRIX_WIDTH}"
 echo "Kernel size: ${KERNEL_HEIGHT}x${KERNEL_WIDTH}"
-echo "Available CPUs: $SLURM_CPUS_PER_TASK"
 
 # Calculate maximum threads (CPU count * 2)
 MAX_THREADS=$((SLURM_CPUS_PER_TASK * 2))

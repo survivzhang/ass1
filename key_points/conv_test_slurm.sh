@@ -8,7 +8,7 @@
 #SBATCH --mem=4G
 #SBATCH --partition=cits3402
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=24070858@student.uwa.edu.au
+#SBATCH --mail-user=24064091@student.uwa.edu.au
 
 
 echo "=== 2D Convolution Performance Test ==="
@@ -18,7 +18,7 @@ echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
 # Test parameters
 MATRIX_SIZE=1000
-KERNEL_SIZE=100
+KERNEL_SIZE=3
 
 echo ""
 echo "=== Test Configuration ==="
@@ -109,8 +109,5 @@ echo "Best thread count with >80% efficiency: $best_efficiency_threads threads"
 echo "Baseline (1 thread) computing time: ${baseline_time}s"
 echo "Best computing time: ${computing_times[$optimal_threads]}s"
 
-# Send output file as email attachment
-echo "Sending results via email..."
-mail -s "Convolution Performance Test Results - Job $SLURM_JOB_ID" -a conv_test.out 24070858@student.uwa.edu.au < /dev/null
 
 
