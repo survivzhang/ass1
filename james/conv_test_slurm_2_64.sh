@@ -16,11 +16,11 @@ echo "Node: $(hostname)"
 echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
 # Test parameters
-MATRIX_SIZE=10000
+MATRIX_SIZE=100000
 KERNEL_SIZE=3
 
 # Use single thread baseline from previous test
-BASELINE_TIME=3.279194
+BASELINE_TIME=330.950020
 
 echo ""
 echo "=== Test Configuration ==="

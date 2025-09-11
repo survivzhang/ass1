@@ -17,7 +17,7 @@ echo "CPUs allocated: $SLURM_CPUS_PER_TASK"
 
 # Test parameters
 MATRIX_SIZE=1000
-KERNEL_SIZE=100
+KERNEL_SIZE=999
 
 echo ""
 echo "=== Single Thread Test Configuration ==="
