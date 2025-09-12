@@ -1,6 +1,10 @@
 #include "conv2d.h"
 #include <math.h>
 
+/**
+ * Group Member: Jizheng Guo(24070858), Zichen Zhang(24064091)
+ */
+
 void print_usage(const char *program_name) {
     printf("Usage: %s [OPTIONS]\n", program_name);
     printf("2D Convolution with OpenMP parallelization\n\n");

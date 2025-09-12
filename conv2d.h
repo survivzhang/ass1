@@ -8,6 +8,10 @@
 #include <unistd.h>
 #include <omp.h>
 
+/**
+ * Group Member: Jizheng Guo(24070858), Zichen Zhang(24064091)
+ */
+
 // Function prototypes for convolution operations
 // Serial (single-threaded) implementations
 void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **output);

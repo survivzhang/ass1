@@ -1,6 +1,10 @@
 #include "conv2d.h"
 
 /**
+ * Group Member: Jizheng Guo(24070858), Zichen Zhang(24064091)
+ */
+
+/**
  * Serial implementation of 2D convolution with "same" padding
  * 
  * Memory layout: Arrays are stored as row-major order (array[row][col])
@@ -264,6 +268,7 @@ void performance_analysis_threads(float **f, int H, int W, float **g, int kH, in
     struct timespec start, end;
     double best_time = 1e9;
     int best_threads = 1;
+    double single_thread_time = 0.0;
     
     for (int threads = 1; threads <= max_threads; threads++) {
         omp_set_num_threads(threads);
@@ -285,12 +290,13 @@ void performance_analysis_threads(float **f, int H, int W, float **g, int kH, in
         
         double runtime = get_time_diff(start, end);
         
-        // Calculate efficiency
-        double efficiency = (best_time / runtime) * 100.0;
+        // Store single thread time as baseline
         if (threads == 1) {
-            efficiency = 100.0; // Baseline
-            best_time = runtime;
+            single_thread_time = runtime;
         }
+        
+        // Calculate efficiency: (single_thread_time / (runtime * threads)) * 100%
+        double efficiency = (single_thread_time / (runtime * threads)) * 100.0;
         
         printf("Threads: %2d | Runtime: %.6f seconds | Efficiency: %.1f%%", 
                threads, runtime, efficiency);
