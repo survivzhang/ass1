@@ -275,7 +275,7 @@ The red curve (10x10) .green curve(1000 x 1000 )and yellow curve (10000x10000) i
 
 ​      • Large Matrix (10000x10000): The yellow curve achieves a good speedup ratio initially. However, as the number of threads increases, the speedup ratio begins to fluctuate dramatically after reaching approximately 50, eventually entering a plateau phase. 
 
-In this set of experiments, we also attempted to scale the input matrix size to 100,000 × 100,000, which represents the **upper limit** of what can be run within node memory.
+In this set of experiments, we also attempted to scale the input matrix size to 100,000 × 100,000, the single thread test time is 330.950020s，but take almost 96G memory. Which represents the **upper limit** of what can be run within node memory.
 
 #### 5.2.2 Chart 2
 
@@ -289,7 +289,7 @@ The blue (10x10), red (100x100), and yellow (999x999) curves in the chart clearl
 
 • Medium kernel (100x100) and large kernel (999x999) approaching input matrix size: The red and yellow curves achieve excellent acceleration ratios initially, aligning with the ideal acceleration ratio curve. However, after reaching a certain acceleration ratio (around 60), both curves plateau, with the acceleration ratio no longer significantly improving with increased thread count.
 
-In this set of experiments, we also found that  the kernel size to 999 × 999, the single-threaded runtime lasted exactly one hour, thus reaching the specified **runtime duration limit** at this point.
+In this set of experiments, we also found that when the input size is 1200 x 1200 with kernel size 999 × 999, the single-threaded runtime is 3604s, thus reaching the specified runtime duration limit in this node. This is the same order of magnitude as the 1000 × 1000 input, so the trend can reference the 1000 × 1000 input results.
 
 #### 5.2.3 Reason analysis
 
@@ -313,7 +313,8 @@ This project demonstrated the design and evaluation of a parallel 2D convolution
 
 ## 7. Appendix
 
-### 7.1 Computing times table with stable kernel(3 x 3)input change:
+### 7.1 Computing times table with stable kernel(3 x 3) and input change(100 x 100, 1000 x 1000, 10000 x 10000):
+
 
 |      | 100 x 100 | 1000 x 1000 | 10000 x 10000 |
 | ---- | --------- | ----------- | ------------- |
@@ -446,7 +447,7 @@ This project demonstrated the design and evaluation of a parallel 2D convolution
 | 127  | 0.0039    | 0.00598     | 0.07423       |
 | 128  | 0.00383   | 0.00595     | 0.06288       |
 
-### 7.2 Computing times table with stable input matrix (1000 x 1000) Kernal change:
+### 7.2 Computing times table with stable input matrix (1000 x 1000) Kernal change(10 x 10, 100 x 100, 999 x 999):
 
 |      | 10 x 10 | 100 x 100 | 999 x 999   |
 | ---- | ------- | --------- | ----------- |
