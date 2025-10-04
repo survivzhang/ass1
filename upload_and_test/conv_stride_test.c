@@ -43,68 +43,41 @@ int main(int argc, char **argv) {
     int num_threads = 0;
     char *mode = "hybrid";
 
-    // Parse command line arguments (only rank 0 prints errors)
-    int opt;
-    while ((opt = getopt(argc, argv, "f:g:o:H:W:k:s:t:m:")) != -1) {
-        switch (opt) {
-            case 'f':
-                input_file = optarg;
-                break;
-            case 'g':
-                kernel_file = optarg;
-                break;
-            case 'o':
-                output_file = optarg;
-                break;
-            case 'H':
-                H = atoi(optarg);
-                break;
-            case 'W':
-                W = atoi(optarg);
-                break;
-            case 'k':
-                if (optind < argc && argv[optind][0] == 'H') {
-                    kH = atoi(argv[optind]);
-                    optind++;
-                } else if (optind < argc && argv[optind][0] == 'W') {
-                    kW = atoi(argv[optind]);
-                    optind++;
-                }
-                break;
-            case 's':
-                if (optind < argc && argv[optind][0] == 'H') {
-                    sH = atoi(argv[optind]);
-                    optind++;
-                } else if (optind < argc && argv[optind][0] == 'W') {
-                    sW = atoi(argv[optind]);
-                    optind++;
-                }
-                break;
-            case 't':
-                num_threads = atoi(optarg);
-                break;
-            case 'm':
-                mode = optarg;
-                break;
-            default:
-                if (rank == 0) {
-                    print_usage(argv[0]);
-                }
-                MPI_Finalize();
-                return 1;
-        }
-    }
-
-    // Manual parsing for -kH, -kW, -sH, -sW
-    for (int i = 1; i < argc - 1; i++) {
-        if (strcmp(argv[i], "-kH") == 0) {
+    // Manual parsing for all arguments
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
+            input_file = argv[i + 1];
+            i++;
+        } else if (strcmp(argv[i], "-g") == 0 && i + 1 < argc) {
+            kernel_file = argv[i + 1];
+            i++;
+        } else if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
+            output_file = argv[i + 1];
+            i++;
+        } else if (strcmp(argv[i], "-H") == 0 && i + 1 < argc) {
+            H = atoi(argv[i + 1]);
+            i++;
+        } else if (strcmp(argv[i], "-W") == 0 && i + 1 < argc) {
+            W = atoi(argv[i + 1]);
+            i++;
+        } else if (strcmp(argv[i], "-kH") == 0 && i + 1 < argc) {
             kH = atoi(argv[i + 1]);
-        } else if (strcmp(argv[i], "-kW") == 0) {
+            i++;
+        } else if (strcmp(argv[i], "-kW") == 0 && i + 1 < argc) {
             kW = atoi(argv[i + 1]);
-        } else if (strcmp(argv[i], "-sH") == 0) {
+            i++;
+        } else if (strcmp(argv[i], "-sH") == 0 && i + 1 < argc) {
             sH = atoi(argv[i + 1]);
-        } else if (strcmp(argv[i], "-sW") == 0) {
+            i++;
+        } else if (strcmp(argv[i], "-sW") == 0 && i + 1 < argc) {
             sW = atoi(argv[i + 1]);
+            i++;
+        } else if (strcmp(argv[i], "-t") == 0 && i + 1 < argc) {
+            num_threads = atoi(argv[i + 1]);
+            i++;
+        } else if (strcmp(argv[i], "-m") == 0 && i + 1 < argc) {
+            mode = argv[i + 1];
+            i++;
         }
     }
 
@@ -158,6 +131,8 @@ int main(int argc, char **argv) {
 
             H = f_rows; W = f_cols;
             kH = g_rows; kW = g_cols;
+            printf("Read dimensions: H=%d W=%d kH=%d kW=%d sH=%d sW=%d\n",
+                   H, W, kH, kW, sH, sW);
         } else {
             fprintf(stderr, "Error: Must provide input files or generation parameters\n");
             print_usage(argv[0]);
@@ -169,6 +144,15 @@ int main(int argc, char **argv) {
     int dims[6] = {H, W, kH, kW, sH, sW};
     MPI_Bcast(dims, 6, MPI_INT, 0, MPI_COMM_WORLD);
     H = dims[0]; W = dims[1]; kH = dims[2]; kW = dims[3]; sH = dims[4]; sW = dims[5];
+
+    // Validate dimensions to prevent division by zero
+    if (rank == 0) {
+        if (H <= 0 || W <= 0 || kH <= 0 || kW <= 0 || sH <= 0 || sW <= 0) {
+            fprintf(stderr, "Error: Invalid dimensions - H=%d W=%d kH=%d kW=%d sH=%d sW=%d\n",
+                    H, W, kH, kW, sH, sW);
+            MPI_Abort(MPI_COMM_WORLD, 1);
+        }
+    }
 
     // Allocate arrays on all processes
     if (rank != 0) {

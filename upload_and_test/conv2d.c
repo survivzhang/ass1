@@ -157,7 +157,11 @@ void conv2d_omp_blocked(float **f, int H, int W, float **g, int kH, int kW, floa
     if (num_threads > 16) {
         block_size = block_size * 2;
     }
-    block_size = (block_size < H / (num_threads * 2)) ? block_size : H / (num_threads * 2);
+
+    // Prevent division issues when H is small
+    int max_block = (num_threads * 2 > 0 && H / (num_threads * 2) > 0) ?
+                    H / (num_threads * 2) : H;
+    block_size = (block_size < max_block) ? block_size : max_block;
     if (block_size < 1) block_size = 1;
     
     // Parallelize over output rows with dynamic scheduling
@@ -415,66 +419,69 @@ void conv2d_mpi_stride(float **f, int H, int W, float **g, int kH, int kW, int s
     if (local_end > out_H) local_end = out_H;
     int local_rows = local_end - local_start;
 
-    if (local_rows <= 0) return;
+    // Compute local output only if this process has rows assigned
+    if (local_rows > 0) {
+        // Calculate input region needed (with halo)
+        int input_start = local_start * sH - pad_top;
+        int input_end = (local_end - 1) * sH + kH - pad_top;
 
-    // Calculate input region needed (with halo)
-    int input_start = local_start * sH - pad_top;
-    int input_end = (local_end - 1) * sH + kH - pad_top;
+        // Clamp to valid input range
+        if (input_start < 0) input_start = 0;
+        if (input_end > H) input_end = H;
+        int input_rows = input_end - input_start;
 
-    // Clamp to valid input range
-    if (input_start < 0) input_start = 0;
-    if (input_end > H) input_end = H;
-    int input_rows = input_end - input_start;
+        // Allocate local input buffer if needed
+        float **local_f = NULL;
+        if (size > 1) {
+            local_f = allocate_2d_array(input_rows, W);
 
-    // Allocate local input buffer if needed
-    float **local_f = NULL;
-    if (size > 1) {
-        local_f = allocate_2d_array(input_rows, W);
-
-        // Gather required input rows
-        for (int i = 0; i < input_rows; i++) {
-            memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+            // Gather required input rows
+            for (int i = 0; i < input_rows; i++) {
+                memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+            }
+        } else {
+            local_f = f;
         }
-    } else {
-        local_f = f;
-    }
 
-    // Compute local output
-    for (int out_i = 0; out_i < local_rows; out_i++) {
-        for (int out_j = 0; out_j < out_W; out_j++) {
-            float sum = 0.0f;
-            int i = (local_start + out_i) * sH;
-            int j = out_j * sW;
+        // Compute local output
+        for (int out_i = 0; out_i < local_rows; out_i++) {
+            for (int out_j = 0; out_j < out_W; out_j++) {
+                float sum = 0.0f;
+                int i = (local_start + out_i) * sH;
+                int j = out_j * sW;
 
-            for (int ki = 0; ki < kH; ki++) {
-                for (int kj = 0; kj < kW; kj++) {
-                    int input_i = i + ki - pad_top;
-                    int input_j = j + kj - pad_left;
+                for (int ki = 0; ki < kH; ki++) {
+                    for (int kj = 0; kj < kW; kj++) {
+                        int input_i = i + ki - pad_top;
+                        int input_j = j + kj - pad_left;
 
-                    if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
-                        int local_i = input_i - input_start;
-                        sum += local_f[local_i][input_j] * g[ki][kj];
+                        if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                            int local_i = input_i - input_start;
+                            sum += local_f[local_i][input_j] * g[ki][kj];
+                        }
                     }
                 }
+                output[local_start + out_i][out_j] = sum;
             }
-            output[local_start + out_i][out_j] = sum;
+        }
+
+        if (size > 1) {
+            free_2d_array(local_f, input_rows);
         }
     }
 
+    // Gather results to all processes
+    // All processes must participate in all MPI_Bcast calls
     if (size > 1) {
-        free_2d_array(local_f, input_rows);
-
-        // Gather results to all processes
         for (int p = 0; p < size; p++) {
             int p_start = p * rows_per_proc;
             int p_end = (p + 1) * rows_per_proc;
             if (p_end > out_H) p_end = out_H;
             int p_rows = p_end - p_start;
 
-            if (p_rows > 0) {
-                for (int i = 0; i < p_rows; i++) {
-                    MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
-                }
+            // All processes participate, even if p_rows is 0
+            for (int i = 0; i < p_rows; i++) {
+                MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
             }
         }
     }
@@ -507,65 +514,68 @@ void conv2d_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, i
     if (local_end > out_H) local_end = out_H;
     int local_rows = local_end - local_start;
 
-    if (local_rows <= 0) return;
+    // Compute local output only if this process has rows assigned
+    if (local_rows > 0) {
+        // Calculate input region needed (with halo)
+        int input_start = local_start * sH - pad_top;
+        int input_end = (local_end - 1) * sH + kH - pad_top;
 
-    // Calculate input region needed (with halo)
-    int input_start = local_start * sH - pad_top;
-    int input_end = (local_end - 1) * sH + kH - pad_top;
+        if (input_start < 0) input_start = 0;
+        if (input_end > H) input_end = H;
+        int input_rows = input_end - input_start;
 
-    if (input_start < 0) input_start = 0;
-    if (input_end > H) input_end = H;
-    int input_rows = input_end - input_start;
+        // Allocate local input buffer if needed
+        float **local_f = NULL;
+        if (size > 1) {
+            local_f = allocate_2d_array(input_rows, W);
 
-    // Allocate local input buffer if needed
-    float **local_f = NULL;
-    if (size > 1) {
-        local_f = allocate_2d_array(input_rows, W);
-
-        for (int i = 0; i < input_rows; i++) {
-            memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+            for (int i = 0; i < input_rows; i++) {
+                memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+            }
+        } else {
+            local_f = f;
         }
-    } else {
-        local_f = f;
-    }
 
-    // Compute local output with OpenMP parallelization
-    #pragma omp parallel for schedule(dynamic, 16) collapse(2)
-    for (int out_i = 0; out_i < local_rows; out_i++) {
-        for (int out_j = 0; out_j < out_W; out_j++) {
-            float sum = 0.0f;
-            int i = (local_start + out_i) * sH;
-            int j = out_j * sW;
+        // Compute local output with OpenMP parallelization
+        #pragma omp parallel for schedule(dynamic, 16) collapse(2)
+        for (int out_i = 0; out_i < local_rows; out_i++) {
+            for (int out_j = 0; out_j < out_W; out_j++) {
+                float sum = 0.0f;
+                int i = (local_start + out_i) * sH;
+                int j = out_j * sW;
 
-            for (int ki = 0; ki < kH; ki++) {
-                for (int kj = 0; kj < kW; kj++) {
-                    int input_i = i + ki - pad_top;
-                    int input_j = j + kj - pad_left;
+                for (int ki = 0; ki < kH; ki++) {
+                    for (int kj = 0; kj < kW; kj++) {
+                        int input_i = i + ki - pad_top;
+                        int input_j = j + kj - pad_left;
 
-                    if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
-                        int local_i = input_i - input_start;
-                        sum += local_f[local_i][input_j] * g[ki][kj];
+                        if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                            int local_i = input_i - input_start;
+                            sum += local_f[local_i][input_j] * g[ki][kj];
+                        }
                     }
                 }
+                output[local_start + out_i][out_j] = sum;
             }
-            output[local_start + out_i][out_j] = sum;
+        }
+
+        if (size > 1) {
+            free_2d_array(local_f, input_rows);
         }
     }
 
+    // Gather results to all processes
+    // All processes must participate in all MPI_Bcast calls
     if (size > 1) {
-        free_2d_array(local_f, input_rows);
-
-        // Gather results to all processes
         for (int p = 0; p < size; p++) {
             int p_start = p * rows_per_proc;
             int p_end = (p + 1) * rows_per_proc;
             if (p_end > out_H) p_end = out_H;
             int p_rows = p_end - p_start;
 
-            if (p_rows > 0) {
-                for (int i = 0; i < p_rows; i++) {
-                    MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
-                }
+            // All processes participate, even if p_rows is 0
+            for (int i = 0; i < p_rows; i++) {
+                MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
             }
         }
     }
