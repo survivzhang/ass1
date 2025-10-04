@@ -12,8 +12,8 @@
 # Group Member: Jiazheng Guo(24070858), Zichen Zhang(24064091)
 # Testing with 1-4 nodes to demonstrate hybrid MPI+OpenMP scaling
 
-module load openmpi/4.1.5
 module load gcc/12.2.0
+module load cray-mpich
 
 echo "=========================================="
 echo "2D Convolution with Stride - Testing"
@@ -70,11 +70,11 @@ for test_dir in "${TEST_CASES[@]}"; do
 
                 if [ "$mode" = "serial" ] || [ "$mode" = "omp" ]; then
                     # Single process for serial/omp
-                    mpirun -np 1 ../conv_stride_test -f "$input" -g "$kernel" \
+                    srun -n 1 ../conv_stride_test -f "$input" -g "$kernel" \
                         -sH $sH -sW $sW -o "$output" -m $mode
                 else
                     # Multiple processes for mpi/hybrid
-                    mpirun -np $SLURM_NTASKS ../conv_stride_test -f "$input" -g "$kernel" \
+                    srun -n $SLURM_NTASKS ../conv_stride_test -f "$input" -g "$kernel" \
                         -sH $sH -sW $sW -o "$output" -m $mode
                 fi
 
