@@ -133,11 +133,6 @@ scontrol show job JOBID
 
 #### Step 5: Check Results
 ```bash
-# View output file
-cat conv_test.out
-
-# View error file (if any)
-cat conv_test.err
 
 # View performance results
 cat performance_results.txt

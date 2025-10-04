@@ -9,7 +9,7 @@
 #include <omp.h>
 
 /**
- * Group Member: Jizheng Guo(24070858), Zichen Zhang(24064091)
+ * Group Member: Jiazheng Guo(24070858), Zichen Zhang(24064091)
  */
 
 // Function prototypes for convolution operations

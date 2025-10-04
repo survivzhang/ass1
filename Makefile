@@ -1,6 +1,6 @@
 # Makefile for 2D Convolution Assignment
 # CITS3402/CITS5507 - Assignment 1
-# Group Member: Jizheng Guo(24070858), Zichen Zhang(24064091)
+# Group Member: Jiazheng Guo(24070858), Zichen Zhang(24064091)
 
 # Compiler and flags
 CC = gcc

@@ -2,7 +2,7 @@
 #include <math.h>
 
 /**
- * Group Member: Jizheng Guo(24070858), Zichen Zhang(24064091)
+ * Group Member: Jiazheng Guo(24070858), Zichen Zhang(24064091)
  */
 
 void print_usage(const char *program_name) {

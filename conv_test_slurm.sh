@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Group Member: Jizheng Guo(24070858), Zichen Zhang(24064091)
+# Group Member: Jiazheng Guo(24070858), Zichen Zhang(24064091)
 
 #SBATCH --job-name=conv_test_simple
 #SBATCH --output=conv_test.out
@@ -32,10 +32,14 @@ echo "Kernel size: ${KERNEL_HEIGHT}x${KERNEL_WIDTH}"
 # Calculate maximum threads (CPU count * 2)
 MAX_THREADS=$((SLURM_CPUS_PER_TASK * 2))
 
+# Set OpenMP environment variable to use all 128 threads
+export OMP_NUM_THREADS=$MAX_THREADS
+
 # Use built-in performance analysis
 echo ""
 echo "=== Running Built-in Performance Analysis ==="
 echo "Using program's built-in analysis function (-a parameter)"
+echo "Maximum threads available: $MAX_THREADS"
 
 # Run the built-in performance analysis and save to file
 ./conv_test -H $MATRIX_HEIGHT -W $MATRIX_WIDTH -h $KERNEL_HEIGHT -w $KERNEL_WIDTH -a > performance_results.txt
