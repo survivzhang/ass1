@@ -24,8 +24,6 @@ void conv2d_omp_stride(float **f, int H, int W, float **g, int kH, int kW, int s
 
 // MPI implementations
 void conv2d_mpi_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm);
-
-// Hybrid MPI+OpenMP implementation
 void conv2d_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm);
 
 // Utility functions for memory management
