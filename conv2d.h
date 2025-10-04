@@ -7,6 +7,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <omp.h>
+#include <mpi.h>
 
 /**
  * Group Member: Jiazheng Guo(24070858), Zichen Zhang(24064091)
@@ -15,9 +16,17 @@
 // Function prototypes for convolution operations
 // Serial (single-threaded) implementations
 void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **output);
+void conv2d_serial_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output);
 
 // Parallel (multi-threaded) implementations
 void conv2d_omp_blocked(float **f, int H, int W, float **g, int kH, int kW, float **output);
+void conv2d_omp_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output);
+
+// MPI implementations
+void conv2d_mpi_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm);
+
+// Hybrid MPI+OpenMP implementation
+void conv2d_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm);
 
 // Utility functions for memory management
 float** allocate_2d_array(int rows, int cols);

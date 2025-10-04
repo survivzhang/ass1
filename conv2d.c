@@ -6,7 +6,7 @@
 
 /**
  * Serial implementation of 2D convolution with "same" padding
- * 
+ *
  * Memory layout: Arrays are stored as row-major order (array[row][col])
  * Cache considerations: Access patterns are optimized for spatial locality
  * by accessing consecutive memory locations in the innermost loops
@@ -15,19 +15,19 @@ void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **o
     // Use precise padding calculation for both odd and even kernels
     int pad_top = (kH - 1) / 2;
     int pad_left = (kW - 1) / 2;
-    
+
     // For each output pixel
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) {
             float sum = 0.0f;
-            
+
             // Convolve with kernel
             for (int ki = 0; ki < kH; ki++) {
                 for (int kj = 0; kj < kW; kj++) {
                     // Calculate input indices with padding
                     int input_i = i + ki - pad_top;
                     int input_j = j + kj - pad_left;
-                    
+
                     // Apply "same" padding (zero-padding outside boundaries)
                     if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
                         // Direct convolution without kernel flipping (correlation)
@@ -41,10 +41,78 @@ void conv2d_serial(float **f, int H, int W, float **g, int kH, int kW, float **o
     }
 }
 
+/**
+ * Serial implementation of 2D convolution with stride and "same" padding
+ * Output size: ceil(H/sH) × ceil(W/sW)
+ */
+void conv2d_serial_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output) {
+    int pad_top = (kH - 1) / 2;
+    int pad_left = (kW - 1) / 2;
+
+    int out_H = (H + sH - 1) / sH;  // ceil(H/sH)
+    int out_W = (W + sW - 1) / sW;  // ceil(W/sW)
+
+    // For each output pixel (with stride)
+    for (int out_i = 0; out_i < out_H; out_i++) {
+        for (int out_j = 0; out_j < out_W; out_j++) {
+            float sum = 0.0f;
+
+            // Map output position to input position
+            int i = out_i * sH;
+            int j = out_j * sW;
+
+            // Convolve with kernel
+            for (int ki = 0; ki < kH; ki++) {
+                for (int kj = 0; kj < kW; kj++) {
+                    int input_i = i + ki - pad_top;
+                    int input_j = j + kj - pad_left;
+
+                    if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                        sum += f[input_i][input_j] * g[ki][kj];
+                    }
+                }
+            }
+            output[out_i][out_j] = sum;
+        }
+    }
+}
+
+
+/**
+ * OpenMP implementation with stride support
+ */
+void conv2d_omp_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output) {
+    int pad_top = (kH - 1) / 2;
+    int pad_left = (kW - 1) / 2;
+
+    int out_H = (H + sH - 1) / sH;
+    int out_W = (W + sW - 1) / sW;
+
+    #pragma omp parallel for schedule(dynamic, 16) collapse(2)
+    for (int out_i = 0; out_i < out_H; out_i++) {
+        for (int out_j = 0; out_j < out_W; out_j++) {
+            float sum = 0.0f;
+            int i = out_i * sH;
+            int j = out_j * sW;
+
+            for (int ki = 0; ki < kH; ki++) {
+                for (int kj = 0; kj < kW; kj++) {
+                    int input_i = i + ki - pad_top;
+                    int input_j = j + kj - pad_left;
+
+                    if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                        sum += f[input_i][input_j] * g[ki][kj];
+                    }
+                }
+            }
+            output[out_i][out_j] = sum;
+        }
+    }
+}
 
 /**
  * OpenMP blocked parallel implementation of 2D convolution
- * 
+ *
  * Advanced parallelization strategy inspired by omp.cpp:
  * - Uses block-based parallelization for better cache utilization
  * - Dynamic scheduling with larger chunks for reduced overhead
@@ -320,4 +388,185 @@ void performance_analysis_threads(float **f, int H, int W, float **g, int kH, in
  */
 double get_time_diff(struct timespec start, struct timespec end) {
     return (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+}
+
+/**
+ * MPI-only distributed memory implementation with stride
+ *
+ * Data decomposition: Row-based decomposition of output
+ * Each process computes a contiguous block of output rows
+ * Requires halo exchange for overlapping input regions
+ */
+void conv2d_mpi_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm) {
+    int rank, size;
+    MPI_Comm_rank(comm, &rank);
+    MPI_Comm_size(comm, &size);
+
+    int pad_top = (kH - 1) / 2;
+    int pad_left = (kW - 1) / 2;
+
+    int out_H = (H + sH - 1) / sH;
+    int out_W = (W + sW - 1) / sW;
+
+    // Distribute output rows among processes
+    int rows_per_proc = (out_H + size - 1) / size;
+    int local_start = rank * rows_per_proc;
+    int local_end = (rank + 1) * rows_per_proc;
+    if (local_end > out_H) local_end = out_H;
+    int local_rows = local_end - local_start;
+
+    if (local_rows <= 0) return;
+
+    // Calculate input region needed (with halo)
+    int input_start = local_start * sH - pad_top;
+    int input_end = (local_end - 1) * sH + kH - pad_top;
+
+    // Clamp to valid input range
+    if (input_start < 0) input_start = 0;
+    if (input_end > H) input_end = H;
+    int input_rows = input_end - input_start;
+
+    // Allocate local input buffer if needed
+    float **local_f = NULL;
+    if (size > 1) {
+        local_f = allocate_2d_array(input_rows, W);
+
+        // Gather required input rows
+        for (int i = 0; i < input_rows; i++) {
+            memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+        }
+    } else {
+        local_f = f;
+    }
+
+    // Compute local output
+    for (int out_i = 0; out_i < local_rows; out_i++) {
+        for (int out_j = 0; out_j < out_W; out_j++) {
+            float sum = 0.0f;
+            int i = (local_start + out_i) * sH;
+            int j = out_j * sW;
+
+            for (int ki = 0; ki < kH; ki++) {
+                for (int kj = 0; kj < kW; kj++) {
+                    int input_i = i + ki - pad_top;
+                    int input_j = j + kj - pad_left;
+
+                    if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                        int local_i = input_i - input_start;
+                        sum += local_f[local_i][input_j] * g[ki][kj];
+                    }
+                }
+            }
+            output[local_start + out_i][out_j] = sum;
+        }
+    }
+
+    if (size > 1) {
+        free_2d_array(local_f, input_rows);
+
+        // Gather results to all processes
+        for (int p = 0; p < size; p++) {
+            int p_start = p * rows_per_proc;
+            int p_end = (p + 1) * rows_per_proc;
+            if (p_end > out_H) p_end = out_H;
+            int p_rows = p_end - p_start;
+
+            if (p_rows > 0) {
+                for (int i = 0; i < p_rows; i++) {
+                    MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Hybrid MPI+OpenMP implementation with stride
+ *
+ * Two-level parallelism:
+ * - MPI: Distribute output rows across processes
+ * - OpenMP: Parallelize computation within each process
+ *
+ * This is the main function for Assignment 2
+ */
+void conv2d_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm) {
+    int rank, size;
+    MPI_Comm_rank(comm, &rank);
+    MPI_Comm_size(comm, &size);
+
+    int pad_top = (kH - 1) / 2;
+    int pad_left = (kW - 1) / 2;
+
+    int out_H = (H + sH - 1) / sH;
+    int out_W = (W + sW - 1) / sW;
+
+    // Distribute output rows among processes
+    int rows_per_proc = (out_H + size - 1) / size;
+    int local_start = rank * rows_per_proc;
+    int local_end = (rank + 1) * rows_per_proc;
+    if (local_end > out_H) local_end = out_H;
+    int local_rows = local_end - local_start;
+
+    if (local_rows <= 0) return;
+
+    // Calculate input region needed (with halo)
+    int input_start = local_start * sH - pad_top;
+    int input_end = (local_end - 1) * sH + kH - pad_top;
+
+    if (input_start < 0) input_start = 0;
+    if (input_end > H) input_end = H;
+    int input_rows = input_end - input_start;
+
+    // Allocate local input buffer if needed
+    float **local_f = NULL;
+    if (size > 1) {
+        local_f = allocate_2d_array(input_rows, W);
+
+        for (int i = 0; i < input_rows; i++) {
+            memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+        }
+    } else {
+        local_f = f;
+    }
+
+    // Compute local output with OpenMP parallelization
+    #pragma omp parallel for schedule(dynamic, 16) collapse(2)
+    for (int out_i = 0; out_i < local_rows; out_i++) {
+        for (int out_j = 0; out_j < out_W; out_j++) {
+            float sum = 0.0f;
+            int i = (local_start + out_i) * sH;
+            int j = out_j * sW;
+
+            for (int ki = 0; ki < kH; ki++) {
+                for (int kj = 0; kj < kW; kj++) {
+                    int input_i = i + ki - pad_top;
+                    int input_j = j + kj - pad_left;
+
+                    if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                        int local_i = input_i - input_start;
+                        sum += local_f[local_i][input_j] * g[ki][kj];
+                    }
+                }
+            }
+            output[local_start + out_i][out_j] = sum;
+        }
+    }
+
+    if (size > 1) {
+        free_2d_array(local_f, input_rows);
+
+        // Gather results to all processes
+        for (int p = 0; p < size; p++) {
+            int p_start = p * rows_per_proc;
+            int p_end = (p + 1) * rows_per_proc;
+            if (p_end > out_H) p_end = out_H;
+            int p_rows = p_end - p_start;
+
+            if (p_rows > 0) {
+                for (int i = 0; i < p_rows; i++) {
+                    MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
+                }
+            }
+        }
+    }
 }
