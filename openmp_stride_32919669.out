@@ -1,0 +1,1243 @@
+==========================================
+OpenMP Stride Test - Single Node
+==========================================
+Job started at: Tue Oct  7 06:44:05 PM AWST 2025
+Node: nid001155
+Testing different stride values with different thread counts
+==========================================
+
+==========================================
+Testing with 1 thread (Serial)
+==========================================
+
+--- 100x100 matrix, kernel 3x3 ---
+
+[1 thread] 100x100 matrix, kernel 3x3, stride (2,2)
+Generating random 100x100 input and 3x3 kernel with stride 2x2
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 100x100, Kernel: 3x3, Stride: 2x2
+Output size: 50x50
+Total time: 0.000039 seconds
+
+[1 thread] 100x100 matrix, kernel 3x3, stride (3,3)
+Generating random 100x100 input and 3x3 kernel with stride 3x3
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 100x100, Kernel: 3x3, Stride: 3x3
+Output size: 34x34
+Total time: 0.000012 seconds
+
+[1 thread] 100x100 matrix, kernel 3x3, stride (5,5)
+Generating random 100x100 input and 3x3 kernel with stride 5x5
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 100x100, Kernel: 3x3, Stride: 5x5
+Output size: 20x20
+Total time: 0.000006 seconds
+
+[1 thread] 100x100 matrix, kernel 3x3, stride (10,10)
+Generating random 100x100 input and 3x3 kernel with stride 10x10
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 100x100, Kernel: 3x3, Stride: 10x10
+Output size: 10x10
+Total time: 0.000003 seconds
+
+--- 1000x1000 matrix, kernel 3x3 ---
+
+[1 thread] 1000x1000 matrix, kernel 3x3, stride (2,2)
+Generating random 1000x1000 input and 3x3 kernel with stride 2x2
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 3x3, Stride: 2x2
+Output size: 500x500
+Total time: 0.002151 seconds
+
+[1 thread] 1000x1000 matrix, kernel 3x3, stride (3,3)
+Generating random 1000x1000 input and 3x3 kernel with stride 3x3
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 3x3, Stride: 3x3
+Output size: 334x334
+Total time: 0.000969 seconds
+
+[1 thread] 1000x1000 matrix, kernel 3x3, stride (5,5)
+Generating random 1000x1000 input and 3x3 kernel with stride 5x5
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 3x3, Stride: 5x5
+Output size: 200x200
+Total time: 0.000353 seconds
+
+[1 thread] 1000x1000 matrix, kernel 3x3, stride (10,10)
+Generating random 1000x1000 input and 3x3 kernel with stride 10x10
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 3x3, Stride: 10x10
+Output size: 100x100
+Total time: 0.000092 seconds
+
+--- 10000x10000 matrix, kernel 3x3 ---
+
+[1 thread] 10000x10000 matrix, kernel 3x3, stride (2,2)
+Generating random 10000x10000 input and 3x3 kernel with stride 2x2
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 10000x10000, Kernel: 3x3, Stride: 2x2
+Output size: 5000x5000
+Total time: 0.249920 seconds
+
+[1 thread] 10000x10000 matrix, kernel 3x3, stride (3,3)
+Generating random 10000x10000 input and 3x3 kernel with stride 3x3
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 10000x10000, Kernel: 3x3, Stride: 3x3
+Output size: 3334x3334
+Total time: 0.110700 seconds
+
+[1 thread] 10000x10000 matrix, kernel 3x3, stride (5,5)
+Generating random 10000x10000 input and 3x3 kernel with stride 5x5
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 10000x10000, Kernel: 3x3, Stride: 5x5
+Output size: 2000x2000
+Total time: 0.039251 seconds
+
+[1 thread] 10000x10000 matrix, kernel 3x3, stride (10,10)
+Generating random 10000x10000 input and 3x3 kernel with stride 10x10
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 10000x10000, Kernel: 3x3, Stride: 10x10
+Output size: 1000x1000
+Total time: 0.009134 seconds
+
+--- 1000x1000 matrix, kernel 10x10 ---
+
+[1 thread] 1000x1000 matrix, kernel 10x10, stride (2,2)
+Generating random 1000x1000 input and 10x10 kernel with stride 2x2
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 10x10, Stride: 2x2
+Output size: 500x500
+Total time: 0.021512 seconds
+
+[1 thread] 1000x1000 matrix, kernel 10x10, stride (3,3)
+Generating random 1000x1000 input and 10x10 kernel with stride 3x3
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 10x10, Stride: 3x3
+Output size: 334x334
+Total time: 0.009479 seconds
+
+[1 thread] 1000x1000 matrix, kernel 10x10, stride (5,5)
+Generating random 1000x1000 input and 10x10 kernel with stride 5x5
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 10x10, Stride: 5x5
+Output size: 200x200
+Total time: 0.003403 seconds
+
+[1 thread] 1000x1000 matrix, kernel 10x10, stride (10,10)
+Generating random 1000x1000 input and 10x10 kernel with stride 10x10
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 10x10, Stride: 10x10
+Output size: 100x100
+Total time: 0.000872 seconds
+
+--- 1000x1000 matrix, kernel 100x100 ---
+
+[1 thread] 1000x1000 matrix, kernel 100x100, stride (2,2)
+Generating random 1000x1000 input and 100x100 kernel with stride 2x2
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 100x100, Stride: 2x2
+Output size: 500x500
+Total time: 2.081130 seconds
+
+[1 thread] 1000x1000 matrix, kernel 100x100, stride (3,3)
+Generating random 1000x1000 input and 100x100 kernel with stride 3x3
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 100x100, Stride: 3x3
+Output size: 334x334
+Total time: 0.927673 seconds
+
+[1 thread] 1000x1000 matrix, kernel 100x100, stride (5,5)
+Generating random 1000x1000 input and 100x100 kernel with stride 5x5
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 100x100, Stride: 5x5
+Output size: 200x200
+Total time: 0.333692 seconds
+
+[1 thread] 1000x1000 matrix, kernel 100x100, stride (10,10)
+Generating random 1000x1000 input and 100x100 kernel with stride 10x10
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 1000x1000, Kernel: 100x100, Stride: 10x10
+Output size: 100x100
+Total time: 0.084625 seconds
+
+==========================================
+Testing with 2 threads (OpenMP)
+==========================================
+
+--- 100x100 matrix, kernel 3x3 ---
+
+[2 threads] 100x100 matrix, kernel 3x3, stride (2,2)
+Generating random 100x100 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 100x100, Kernel: 3x3, Stride: 2x2
+Output size: 50x50
+Total time: 0.000149 seconds
+
+[2 threads] 100x100 matrix, kernel 3x3, stride (3,3)
+Generating random 100x100 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 100x100, Kernel: 3x3, Stride: 3x3
+Output size: 34x34
+Total time: 0.000101 seconds
+
+[2 threads] 100x100 matrix, kernel 3x3, stride (5,5)
+Generating random 100x100 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 100x100, Kernel: 3x3, Stride: 5x5
+Output size: 20x20
+Total time: 0.000078 seconds
+
+[2 threads] 100x100 matrix, kernel 3x3, stride (10,10)
+Generating random 100x100 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 100x100, Kernel: 3x3, Stride: 10x10
+Output size: 10x10
+Total time: 0.000080 seconds
+
+--- 1000x1000 matrix, kernel 3x3 ---
+
+[2 threads] 1000x1000 matrix, kernel 3x3, stride (2,2)
+Generating random 1000x1000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 3x3, Stride: 2x2
+Output size: 500x500
+Total time: 0.002608 seconds
+
+[2 threads] 1000x1000 matrix, kernel 3x3, stride (3,3)
+Generating random 1000x1000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 3x3, Stride: 3x3
+Output size: 334x334
+Total time: 0.001485 seconds
+
+[2 threads] 1000x1000 matrix, kernel 3x3, stride (5,5)
+Generating random 1000x1000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 3x3, Stride: 5x5
+Output size: 200x200
+Total time: 0.000507 seconds
+
+[2 threads] 1000x1000 matrix, kernel 3x3, stride (10,10)
+Generating random 1000x1000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 3x3, Stride: 10x10
+Output size: 100x100
+Total time: 0.000227 seconds
+
+--- 10000x10000 matrix, kernel 3x3 ---
+
+[2 threads] 10000x10000 matrix, kernel 3x3, stride (2,2)
+Generating random 10000x10000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 10000x10000, Kernel: 3x3, Stride: 2x2
+Output size: 5000x5000
+Total time: 0.283915 seconds
+
+[2 threads] 10000x10000 matrix, kernel 3x3, stride (3,3)
+Generating random 10000x10000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 10000x10000, Kernel: 3x3, Stride: 3x3
+Output size: 3334x3334
+Total time: 0.129379 seconds
+
+[2 threads] 10000x10000 matrix, kernel 3x3, stride (5,5)
+Generating random 10000x10000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 10000x10000, Kernel: 3x3, Stride: 5x5
+Output size: 2000x2000
+Total time: 0.045644 seconds
+
+[2 threads] 10000x10000 matrix, kernel 3x3, stride (10,10)
+Generating random 10000x10000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 10000x10000, Kernel: 3x3, Stride: 10x10
+Output size: 1000x1000
+Total time: 0.014150 seconds
+
+--- 1000x1000 matrix, kernel 10x10 ---
+
+[2 threads] 1000x1000 matrix, kernel 10x10, stride (2,2)
+Generating random 1000x1000 input and 10x10 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 10x10, Stride: 2x2
+Output size: 500x500
+Total time: 0.012275 seconds
+
+[2 threads] 1000x1000 matrix, kernel 10x10, stride (3,3)
+Generating random 1000x1000 input and 10x10 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 10x10, Stride: 3x3
+Output size: 334x334
+Total time: 0.005557 seconds
+
+[2 threads] 1000x1000 matrix, kernel 10x10, stride (5,5)
+Generating random 1000x1000 input and 10x10 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 10x10, Stride: 5x5
+Output size: 200x200
+Total time: 0.002143 seconds
+
+[2 threads] 1000x1000 matrix, kernel 10x10, stride (10,10)
+Generating random 1000x1000 input and 10x10 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 10x10, Stride: 10x10
+Output size: 100x100
+Total time: 0.000772 seconds
+
+--- 1000x1000 matrix, kernel 100x100 ---
+
+[2 threads] 1000x1000 matrix, kernel 100x100, stride (2,2)
+Generating random 1000x1000 input and 100x100 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 100x100, Stride: 2x2
+Output size: 500x500
+Total time: 1.056290 seconds
+
+[2 threads] 1000x1000 matrix, kernel 100x100, stride (3,3)
+Generating random 1000x1000 input and 100x100 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 100x100, Stride: 3x3
+Output size: 334x334
+Total time: 0.471479 seconds
+
+[2 threads] 1000x1000 matrix, kernel 100x100, stride (5,5)
+Generating random 1000x1000 input and 100x100 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 100x100, Stride: 5x5
+Output size: 200x200
+Total time: 0.169862 seconds
+
+[2 threads] 1000x1000 matrix, kernel 100x100, stride (10,10)
+Generating random 1000x1000 input and 100x100 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 1000x1000, Kernel: 100x100, Stride: 10x10
+Output size: 100x100
+Total time: 0.042273 seconds
+
+==========================================
+Testing with 4 threads (OpenMP)
+==========================================
+
+--- 100x100 matrix, kernel 3x3 ---
+
+[4 threads] 100x100 matrix, kernel 3x3, stride (2,2)
+Generating random 100x100 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 100x100, Kernel: 3x3, Stride: 2x2
+Output size: 50x50
+Total time: 0.000278 seconds
+
+[4 threads] 100x100 matrix, kernel 3x3, stride (3,3)
+Generating random 100x100 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 100x100, Kernel: 3x3, Stride: 3x3
+Output size: 34x34
+Total time: 0.000258 seconds
+
+[4 threads] 100x100 matrix, kernel 3x3, stride (5,5)
+Generating random 100x100 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 100x100, Kernel: 3x3, Stride: 5x5
+Output size: 20x20
+Total time: 0.000209 seconds
+
+[4 threads] 100x100 matrix, kernel 3x3, stride (10,10)
+Generating random 100x100 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 100x100, Kernel: 3x3, Stride: 10x10
+Output size: 10x10
+Total time: 0.000205 seconds
+
+--- 1000x1000 matrix, kernel 3x3 ---
+
+[4 threads] 1000x1000 matrix, kernel 3x3, stride (2,2)
+Generating random 1000x1000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 3x3, Stride: 2x2
+Output size: 500x500
+Total time: 0.003065 seconds
+
+[4 threads] 1000x1000 matrix, kernel 3x3, stride (3,3)
+Generating random 1000x1000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 3x3, Stride: 3x3
+Output size: 334x334
+Total time: 0.001575 seconds
+
+[4 threads] 1000x1000 matrix, kernel 3x3, stride (5,5)
+Generating random 1000x1000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 3x3, Stride: 5x5
+Output size: 200x200
+Total time: 0.000763 seconds
+
+[4 threads] 1000x1000 matrix, kernel 3x3, stride (10,10)
+Generating random 1000x1000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 3x3, Stride: 10x10
+Output size: 100x100
+Total time: 0.000354 seconds
+
+--- 10000x10000 matrix, kernel 3x3 ---
+
+[4 threads] 10000x10000 matrix, kernel 3x3, stride (2,2)
+Generating random 10000x10000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 10000x10000, Kernel: 3x3, Stride: 2x2
+Output size: 5000x5000
+Total time: 0.297129 seconds
+
+[4 threads] 10000x10000 matrix, kernel 3x3, stride (3,3)
+Generating random 10000x10000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 10000x10000, Kernel: 3x3, Stride: 3x3
+Output size: 3334x3334
+Total time: 0.151376 seconds
+
+[4 threads] 10000x10000 matrix, kernel 3x3, stride (5,5)
+Generating random 10000x10000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 10000x10000, Kernel: 3x3, Stride: 5x5
+Output size: 2000x2000
+Total time: 0.063512 seconds
+
+[4 threads] 10000x10000 matrix, kernel 3x3, stride (10,10)
+Generating random 10000x10000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 10000x10000, Kernel: 3x3, Stride: 10x10
+Output size: 1000x1000
+Total time: 0.021548 seconds
+
+--- 1000x1000 matrix, kernel 10x10 ---
+
+[4 threads] 1000x1000 matrix, kernel 10x10, stride (2,2)
+Generating random 1000x1000 input and 10x10 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 10x10, Stride: 2x2
+Output size: 500x500
+Total time: 0.007320 seconds
+
+[4 threads] 1000x1000 matrix, kernel 10x10, stride (3,3)
+Generating random 1000x1000 input and 10x10 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 10x10, Stride: 3x3
+Output size: 334x334
+Total time: 0.003831 seconds
+
+[4 threads] 1000x1000 matrix, kernel 10x10, stride (5,5)
+Generating random 1000x1000 input and 10x10 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 10x10, Stride: 5x5
+Output size: 200x200
+Total time: 0.001712 seconds
+
+[4 threads] 1000x1000 matrix, kernel 10x10, stride (10,10)
+Generating random 1000x1000 input and 10x10 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 10x10, Stride: 10x10
+Output size: 100x100
+Total time: 0.000885 seconds
+
+--- 1000x1000 matrix, kernel 100x100 ---
+
+[4 threads] 1000x1000 matrix, kernel 100x100, stride (2,2)
+Generating random 1000x1000 input and 100x100 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 100x100, Stride: 2x2
+Output size: 500x500
+Total time: 0.529463 seconds
+
+[4 threads] 1000x1000 matrix, kernel 100x100, stride (3,3)
+Generating random 1000x1000 input and 100x100 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 100x100, Stride: 3x3
+Output size: 334x334
+Total time: 0.237167 seconds
+
+[4 threads] 1000x1000 matrix, kernel 100x100, stride (5,5)
+Generating random 1000x1000 input and 100x100 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 100x100, Stride: 5x5
+Output size: 200x200
+Total time: 0.085381 seconds
+
+[4 threads] 1000x1000 matrix, kernel 100x100, stride (10,10)
+Generating random 1000x1000 input and 100x100 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 1000x1000, Kernel: 100x100, Stride: 10x10
+Output size: 100x100
+Total time: 0.022156 seconds
+
+==========================================
+Testing with 8 threads (OpenMP)
+==========================================
+
+--- 100x100 matrix, kernel 3x3 ---
+
+[8 threads] 100x100 matrix, kernel 3x3, stride (2,2)
+Generating random 100x100 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 100x100, Kernel: 3x3, Stride: 2x2
+Output size: 50x50
+Total time: 0.000428 seconds
+
+[8 threads] 100x100 matrix, kernel 3x3, stride (3,3)
+Generating random 100x100 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 100x100, Kernel: 3x3, Stride: 3x3
+Output size: 34x34
+Total time: 0.000375 seconds
+
+[8 threads] 100x100 matrix, kernel 3x3, stride (5,5)
+Generating random 100x100 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 100x100, Kernel: 3x3, Stride: 5x5
+Output size: 20x20
+Total time: 0.000383 seconds
+
+[8 threads] 100x100 matrix, kernel 3x3, stride (10,10)
+Generating random 100x100 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 100x100, Kernel: 3x3, Stride: 10x10
+Output size: 10x10
+Total time: 0.000397 seconds
+
+--- 1000x1000 matrix, kernel 3x3 ---
+
+[8 threads] 1000x1000 matrix, kernel 3x3, stride (2,2)
+Generating random 1000x1000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 3x3, Stride: 2x2
+Output size: 500x500
+Total time: 0.003073 seconds
+
+[8 threads] 1000x1000 matrix, kernel 3x3, stride (3,3)
+Generating random 1000x1000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 3x3, Stride: 3x3
+Output size: 334x334
+Total time: 0.001680 seconds
+
+[8 threads] 1000x1000 matrix, kernel 3x3, stride (5,5)
+Generating random 1000x1000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 3x3, Stride: 5x5
+Output size: 200x200
+Total time: 0.000874 seconds
+
+[8 threads] 1000x1000 matrix, kernel 3x3, stride (10,10)
+Generating random 1000x1000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 3x3, Stride: 10x10
+Output size: 100x100
+Total time: 0.000484 seconds
+
+--- 10000x10000 matrix, kernel 3x3 ---
+
+[8 threads] 10000x10000 matrix, kernel 3x3, stride (2,2)
+Generating random 10000x10000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 10000x10000, Kernel: 3x3, Stride: 2x2
+Output size: 5000x5000
+Total time: 0.305886 seconds
+
+[8 threads] 10000x10000 matrix, kernel 3x3, stride (3,3)
+Generating random 10000x10000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 10000x10000, Kernel: 3x3, Stride: 3x3
+Output size: 3334x3334
+Total time: 0.138644 seconds
+
+[8 threads] 10000x10000 matrix, kernel 3x3, stride (5,5)
+Generating random 10000x10000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 10000x10000, Kernel: 3x3, Stride: 5x5
+Output size: 2000x2000
+Total time: 0.049963 seconds
+
+[8 threads] 10000x10000 matrix, kernel 3x3, stride (10,10)
+Generating random 10000x10000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 10000x10000, Kernel: 3x3, Stride: 10x10
+Output size: 1000x1000
+Total time: 0.017757 seconds
+
+--- 1000x1000 matrix, kernel 10x10 ---
+
+[8 threads] 1000x1000 matrix, kernel 10x10, stride (2,2)
+Generating random 1000x1000 input and 10x10 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 10x10, Stride: 2x2
+Output size: 500x500
+Total time: 0.004977 seconds
+
+[8 threads] 1000x1000 matrix, kernel 10x10, stride (3,3)
+Generating random 1000x1000 input and 10x10 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 10x10, Stride: 3x3
+Output size: 334x334
+Total time: 0.003001 seconds
+
+[8 threads] 1000x1000 matrix, kernel 10x10, stride (5,5)
+Generating random 1000x1000 input and 10x10 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 10x10, Stride: 5x5
+Output size: 200x200
+Total time: 0.001589 seconds
+
+[8 threads] 1000x1000 matrix, kernel 10x10, stride (10,10)
+Generating random 1000x1000 input and 10x10 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 10x10, Stride: 10x10
+Output size: 100x100
+Total time: 0.000804 seconds
+
+--- 1000x1000 matrix, kernel 100x100 ---
+
+[8 threads] 1000x1000 matrix, kernel 100x100, stride (2,2)
+Generating random 1000x1000 input and 100x100 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 100x100, Stride: 2x2
+Output size: 500x500
+Total time: 0.264862 seconds
+
+[8 threads] 1000x1000 matrix, kernel 100x100, stride (3,3)
+Generating random 1000x1000 input and 100x100 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 100x100, Stride: 3x3
+Output size: 334x334
+Total time: 0.119286 seconds
+
+[8 threads] 1000x1000 matrix, kernel 100x100, stride (5,5)
+Generating random 1000x1000 input and 100x100 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 100x100, Stride: 5x5
+Output size: 200x200
+Total time: 0.043111 seconds
+
+[8 threads] 1000x1000 matrix, kernel 100x100, stride (10,10)
+Generating random 1000x1000 input and 100x100 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 1000x1000, Kernel: 100x100, Stride: 10x10
+Output size: 100x100
+Total time: 0.011767 seconds
+
+==========================================
+Testing with 16 threads (OpenMP)
+==========================================
+
+--- 100x100 matrix, kernel 3x3 ---
+
+[16 threads] 100x100 matrix, kernel 3x3, stride (2,2)
+Generating random 100x100 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 100x100, Kernel: 3x3, Stride: 2x2
+Output size: 50x50
+Total time: 0.000807 seconds
+
+[16 threads] 100x100 matrix, kernel 3x3, stride (3,3)
+Generating random 100x100 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 100x100, Kernel: 3x3, Stride: 3x3
+Output size: 34x34
+Total time: 0.000728 seconds
+
+[16 threads] 100x100 matrix, kernel 3x3, stride (5,5)
+Generating random 100x100 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 100x100, Kernel: 3x3, Stride: 5x5
+Output size: 20x20
+Total time: 0.000640 seconds
+
+[16 threads] 100x100 matrix, kernel 3x3, stride (10,10)
+Generating random 100x100 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 100x100, Kernel: 3x3, Stride: 10x10
+Output size: 10x10
+Total time: 0.000634 seconds
+
+--- 1000x1000 matrix, kernel 3x3 ---
+
+[16 threads] 1000x1000 matrix, kernel 3x3, stride (2,2)
+Generating random 1000x1000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 3x3, Stride: 2x2
+Output size: 500x500
+Total time: 0.002697 seconds
+
+[16 threads] 1000x1000 matrix, kernel 3x3, stride (3,3)
+Generating random 1000x1000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 3x3, Stride: 3x3
+Output size: 334x334
+Total time: 0.001810 seconds
+
+[16 threads] 1000x1000 matrix, kernel 3x3, stride (5,5)
+Generating random 1000x1000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 3x3, Stride: 5x5
+Output size: 200x200
+Total time: 0.001208 seconds
+
+[16 threads] 1000x1000 matrix, kernel 3x3, stride (10,10)
+Generating random 1000x1000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 3x3, Stride: 10x10
+Output size: 100x100
+Total time: 0.000801 seconds
+
+--- 10000x10000 matrix, kernel 3x3 ---
+
+[16 threads] 10000x10000 matrix, kernel 3x3, stride (2,2)
+Generating random 10000x10000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 10000x10000, Kernel: 3x3, Stride: 2x2
+Output size: 5000x5000
+Total time: 0.254283 seconds
+
+[16 threads] 10000x10000 matrix, kernel 3x3, stride (3,3)
+Generating random 10000x10000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 10000x10000, Kernel: 3x3, Stride: 3x3
+Output size: 3334x3334
+Total time: 0.112876 seconds
+
+[16 threads] 10000x10000 matrix, kernel 3x3, stride (5,5)
+Generating random 10000x10000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 10000x10000, Kernel: 3x3, Stride: 5x5
+Output size: 2000x2000
+Total time: 0.041930 seconds
+
+[16 threads] 10000x10000 matrix, kernel 3x3, stride (10,10)
+Generating random 10000x10000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 10000x10000, Kernel: 3x3, Stride: 10x10
+Output size: 1000x1000
+Total time: 0.015421 seconds
+
+--- 1000x1000 matrix, kernel 10x10 ---
+
+[16 threads] 1000x1000 matrix, kernel 10x10, stride (2,2)
+Generating random 1000x1000 input and 10x10 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 10x10, Stride: 2x2
+Output size: 500x500
+Total time: 0.003324 seconds
+
+[16 threads] 1000x1000 matrix, kernel 10x10, stride (3,3)
+Generating random 1000x1000 input and 10x10 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 10x10, Stride: 3x3
+Output size: 334x334
+Total time: 0.002192 seconds
+
+[16 threads] 1000x1000 matrix, kernel 10x10, stride (5,5)
+Generating random 1000x1000 input and 10x10 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 10x10, Stride: 5x5
+Output size: 200x200
+Total time: 0.001665 seconds
+
+[16 threads] 1000x1000 matrix, kernel 10x10, stride (10,10)
+Generating random 1000x1000 input and 10x10 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 10x10, Stride: 10x10
+Output size: 100x100
+Total time: 0.000992 seconds
+
+--- 1000x1000 matrix, kernel 100x100 ---
+
+[16 threads] 1000x1000 matrix, kernel 100x100, stride (2,2)
+Generating random 1000x1000 input and 100x100 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 100x100, Stride: 2x2
+Output size: 500x500
+Total time: 0.136786 seconds
+
+[16 threads] 1000x1000 matrix, kernel 100x100, stride (3,3)
+Generating random 1000x1000 input and 100x100 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 100x100, Stride: 3x3
+Output size: 334x334
+Total time: 0.062240 seconds
+
+[16 threads] 1000x1000 matrix, kernel 100x100, stride (5,5)
+Generating random 1000x1000 input and 100x100 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 100x100, Stride: 5x5
+Output size: 200x200
+Total time: 0.023014 seconds
+
+[16 threads] 1000x1000 matrix, kernel 100x100, stride (10,10)
+Generating random 1000x1000 input and 100x100 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 1000x1000, Kernel: 100x100, Stride: 10x10
+Output size: 100x100
+Total time: 0.007182 seconds
+
+==========================================
+Testing with 32 threads (OpenMP)
+==========================================
+
+--- 100x100 matrix, kernel 3x3 ---
+
+[32 threads] 100x100 matrix, kernel 3x3, stride (2,2)
+Generating random 100x100 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 100x100, Kernel: 3x3, Stride: 2x2
+Output size: 50x50
+Total time: 0.001366 seconds
+
+[32 threads] 100x100 matrix, kernel 3x3, stride (3,3)
+Generating random 100x100 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 100x100, Kernel: 3x3, Stride: 3x3
+Output size: 34x34
+Total time: 0.001377 seconds
+
+[32 threads] 100x100 matrix, kernel 3x3, stride (5,5)
+Generating random 100x100 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 100x100, Kernel: 3x3, Stride: 5x5
+Output size: 20x20
+Total time: 0.001371 seconds
+
+[32 threads] 100x100 matrix, kernel 3x3, stride (10,10)
+Generating random 100x100 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 100x100, Kernel: 3x3, Stride: 10x10
+Output size: 10x10
+Total time: 0.001400 seconds
+
+--- 1000x1000 matrix, kernel 3x3 ---
+
+[32 threads] 1000x1000 matrix, kernel 3x3, stride (2,2)
+Generating random 1000x1000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 3x3, Stride: 2x2
+Output size: 500x500
+Total time: 0.002621 seconds
+
+[32 threads] 1000x1000 matrix, kernel 3x3, stride (3,3)
+Generating random 1000x1000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 3x3, Stride: 3x3
+Output size: 334x334
+Total time: 0.002007 seconds
+
+[32 threads] 1000x1000 matrix, kernel 3x3, stride (5,5)
+Generating random 1000x1000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 3x3, Stride: 5x5
+Output size: 200x200
+Total time: 0.001637 seconds
+
+[32 threads] 1000x1000 matrix, kernel 3x3, stride (10,10)
+Generating random 1000x1000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 3x3, Stride: 10x10
+Output size: 100x100
+Total time: 0.001426 seconds
+
+--- 10000x10000 matrix, kernel 3x3 ---
+
+[32 threads] 10000x10000 matrix, kernel 3x3, stride (2,2)
+Generating random 10000x10000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 10000x10000, Kernel: 3x3, Stride: 2x2
+Output size: 5000x5000
+Total time: 0.525814 seconds
+
+[32 threads] 10000x10000 matrix, kernel 3x3, stride (3,3)
+Generating random 10000x10000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 10000x10000, Kernel: 3x3, Stride: 3x3
+Output size: 3334x3334
+Total time: 0.208948 seconds
+
+[32 threads] 10000x10000 matrix, kernel 3x3, stride (5,5)
+Generating random 10000x10000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 10000x10000, Kernel: 3x3, Stride: 5x5
+Output size: 2000x2000
+Total time: 0.059024 seconds
+
+[32 threads] 10000x10000 matrix, kernel 3x3, stride (10,10)
+Generating random 10000x10000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 10000x10000, Kernel: 3x3, Stride: 10x10
+Output size: 1000x1000
+Total time: 0.010983 seconds
+
+--- 1000x1000 matrix, kernel 10x10 ---
+
+[32 threads] 1000x1000 matrix, kernel 10x10, stride (2,2)
+Generating random 1000x1000 input and 10x10 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 10x10, Stride: 2x2
+Output size: 500x500
+Total time: 0.002999 seconds
+
+[32 threads] 1000x1000 matrix, kernel 10x10, stride (3,3)
+Generating random 1000x1000 input and 10x10 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 10x10, Stride: 3x3
+Output size: 334x334
+Total time: 0.002418 seconds
+
+[32 threads] 1000x1000 matrix, kernel 10x10, stride (5,5)
+Generating random 1000x1000 input and 10x10 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 10x10, Stride: 5x5
+Output size: 200x200
+Total time: 0.001804 seconds
+
+[32 threads] 1000x1000 matrix, kernel 10x10, stride (10,10)
+Generating random 1000x1000 input and 10x10 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 10x10, Stride: 10x10
+Output size: 100x100
+Total time: 0.001564 seconds
+
+--- 1000x1000 matrix, kernel 100x100 ---
+
+[32 threads] 1000x1000 matrix, kernel 100x100, stride (2,2)
+Generating random 1000x1000 input and 100x100 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 100x100, Stride: 2x2
+Output size: 500x500
+Total time: 0.075877 seconds
+
+[32 threads] 1000x1000 matrix, kernel 100x100, stride (3,3)
+Generating random 1000x1000 input and 100x100 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 100x100, Stride: 3x3
+Output size: 334x334
+Total time: 0.034943 seconds
+
+[32 threads] 1000x1000 matrix, kernel 100x100, stride (5,5)
+Generating random 1000x1000 input and 100x100 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 100x100, Stride: 5x5
+Output size: 200x200
+Total time: 0.013699 seconds
+
+[32 threads] 1000x1000 matrix, kernel 100x100, stride (10,10)
+Generating random 1000x1000 input and 100x100 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 1000x1000, Kernel: 100x100, Stride: 10x10
+Output size: 100x100
+Total time: 0.004848 seconds
+
+==========================================
+Testing with 64 threads (OpenMP)
+==========================================
+
+--- 100x100 matrix, kernel 3x3 ---
+
+[64 threads] 100x100 matrix, kernel 3x3, stride (2,2)
+Generating random 100x100 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 100x100, Kernel: 3x3, Stride: 2x2
+Output size: 50x50
+Total time: 0.002895 seconds
+
+[64 threads] 100x100 matrix, kernel 3x3, stride (3,3)
+Generating random 100x100 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 100x100, Kernel: 3x3, Stride: 3x3
+Output size: 34x34
+Total time: 0.002960 seconds
+
+[64 threads] 100x100 matrix, kernel 3x3, stride (5,5)
+Generating random 100x100 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 100x100, Kernel: 3x3, Stride: 5x5
+Output size: 20x20
+Total time: 0.002785 seconds
+
+[64 threads] 100x100 matrix, kernel 3x3, stride (10,10)
+Generating random 100x100 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 100x100, Kernel: 3x3, Stride: 10x10
+Output size: 10x10
+Total time: 0.002706 seconds
+
+--- 1000x1000 matrix, kernel 3x3 ---
+
+[64 threads] 1000x1000 matrix, kernel 3x3, stride (2,2)
+Generating random 1000x1000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 3x3, Stride: 2x2
+Output size: 500x500
+Total time: 0.003375 seconds
+
+[64 threads] 1000x1000 matrix, kernel 3x3, stride (3,3)
+Generating random 1000x1000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 3x3, Stride: 3x3
+Output size: 334x334
+Total time: 0.003087 seconds
+
+[64 threads] 1000x1000 matrix, kernel 3x3, stride (5,5)
+Generating random 1000x1000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 3x3, Stride: 5x5
+Output size: 200x200
+Total time: 0.002813 seconds
+
+[64 threads] 1000x1000 matrix, kernel 3x3, stride (10,10)
+Generating random 1000x1000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 3x3, Stride: 10x10
+Output size: 100x100
+Total time: 0.002748 seconds
+
+--- 10000x10000 matrix, kernel 3x3 ---
+
+[64 threads] 10000x10000 matrix, kernel 3x3, stride (2,2)
+Generating random 10000x10000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 10000x10000, Kernel: 3x3, Stride: 2x2
+Output size: 5000x5000
+Total time: 1.114246 seconds
+
+[64 threads] 10000x10000 matrix, kernel 3x3, stride (3,3)
+Generating random 10000x10000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 10000x10000, Kernel: 3x3, Stride: 3x3
+Output size: 3334x3334
+Total time: 0.418090 seconds
+
+[64 threads] 10000x10000 matrix, kernel 3x3, stride (5,5)
+Generating random 10000x10000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 10000x10000, Kernel: 3x3, Stride: 5x5
+Output size: 2000x2000
+Total time: 0.118055 seconds
+
+[64 threads] 10000x10000 matrix, kernel 3x3, stride (10,10)
+Generating random 10000x10000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 10000x10000, Kernel: 3x3, Stride: 10x10
+Output size: 1000x1000
+Total time: 0.009492 seconds
+
+--- 1000x1000 matrix, kernel 10x10 ---
+
+[64 threads] 1000x1000 matrix, kernel 10x10, stride (2,2)
+Generating random 1000x1000 input and 10x10 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 10x10, Stride: 2x2
+Output size: 500x500
+Total time: 0.003964 seconds
+
+[64 threads] 1000x1000 matrix, kernel 10x10, stride (3,3)
+Generating random 1000x1000 input and 10x10 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 10x10, Stride: 3x3
+Output size: 334x334
+Total time: 0.003595 seconds
+
+[64 threads] 1000x1000 matrix, kernel 10x10, stride (5,5)
+Generating random 1000x1000 input and 10x10 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 10x10, Stride: 5x5
+Output size: 200x200
+Total time: 0.003105 seconds
+
+[64 threads] 1000x1000 matrix, kernel 10x10, stride (10,10)
+Generating random 1000x1000 input and 10x10 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 10x10, Stride: 10x10
+Output size: 100x100
+Total time: 0.002865 seconds
+
+--- 1000x1000 matrix, kernel 100x100 ---
+
+[64 threads] 1000x1000 matrix, kernel 100x100, stride (2,2)
+Generating random 1000x1000 input and 100x100 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 100x100, Stride: 2x2
+Output size: 500x500
+Total time: 0.039762 seconds
+
+[64 threads] 1000x1000 matrix, kernel 100x100, stride (3,3)
+Generating random 1000x1000 input and 100x100 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 100x100, Stride: 3x3
+Output size: 334x334
+Total time: 0.019509 seconds
+
+[64 threads] 1000x1000 matrix, kernel 100x100, stride (5,5)
+Generating random 1000x1000 input and 100x100 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 100x100, Stride: 5x5
+Output size: 200x200
+Total time: 0.009012 seconds
+
+[64 threads] 1000x1000 matrix, kernel 100x100, stride (10,10)
+Generating random 1000x1000 input and 100x100 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 1000x1000, Kernel: 100x100, Stride: 10x10
+Output size: 100x100
+Total time: 0.005009 seconds
+
+==========================================
+Testing with 96 threads (OpenMP)
+==========================================
+
+--- 100x100 matrix, kernel 3x3 ---
+
+[96 threads] 100x100 matrix, kernel 3x3, stride (2,2)
+Generating random 100x100 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 100x100, Kernel: 3x3, Stride: 2x2
+Output size: 50x50
+Total time: 0.004404 seconds
+
+[96 threads] 100x100 matrix, kernel 3x3, stride (3,3)
+Generating random 100x100 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 100x100, Kernel: 3x3, Stride: 3x3
+Output size: 34x34
+Total time: 0.004371 seconds
+
+[96 threads] 100x100 matrix, kernel 3x3, stride (5,5)
+Generating random 100x100 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 100x100, Kernel: 3x3, Stride: 5x5
+Output size: 20x20
+Total time: 0.004260 seconds
+
+[96 threads] 100x100 matrix, kernel 3x3, stride (10,10)
+Generating random 100x100 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 100x100, Kernel: 3x3, Stride: 10x10
+Output size: 10x10
+Total time: 0.004525 seconds
+
+--- 1000x1000 matrix, kernel 3x3 ---
+
+[96 threads] 1000x1000 matrix, kernel 3x3, stride (2,2)
+Generating random 1000x1000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 3x3, Stride: 2x2
+Output size: 500x500
+Total time: 0.005059 seconds
+
+[96 threads] 1000x1000 matrix, kernel 3x3, stride (3,3)
+Generating random 1000x1000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 3x3, Stride: 3x3
+Output size: 334x334
+Total time: 0.004545 seconds
+
+[96 threads] 1000x1000 matrix, kernel 3x3, stride (5,5)
+Generating random 1000x1000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 3x3, Stride: 5x5
+Output size: 200x200
+Total time: 0.004414 seconds
+
+[96 threads] 1000x1000 matrix, kernel 3x3, stride (10,10)
+Generating random 1000x1000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 3x3, Stride: 10x10
+Output size: 100x100
+Total time: 0.004537 seconds
+
+--- 10000x10000 matrix, kernel 3x3 ---
+
+[96 threads] 10000x10000 matrix, kernel 3x3, stride (2,2)
+Generating random 10000x10000 input and 3x3 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 10000x10000, Kernel: 3x3, Stride: 2x2
+Output size: 5000x5000
+Total time: 1.243857 seconds
+
+[96 threads] 10000x10000 matrix, kernel 3x3, stride (3,3)
+Generating random 10000x10000 input and 3x3 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 10000x10000, Kernel: 3x3, Stride: 3x3
+Output size: 3334x3334
+Total time: 0.488796 seconds
+
+[96 threads] 10000x10000 matrix, kernel 3x3, stride (5,5)
+Generating random 10000x10000 input and 3x3 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 10000x10000, Kernel: 3x3, Stride: 5x5
+Output size: 2000x2000
+Total time: 0.138684 seconds
+
+[96 threads] 10000x10000 matrix, kernel 3x3, stride (10,10)
+Generating random 10000x10000 input and 3x3 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 10000x10000, Kernel: 3x3, Stride: 10x10
+Output size: 1000x1000
+Total time: 0.010786 seconds
+
+--- 1000x1000 matrix, kernel 10x10 ---
+
+[96 threads] 1000x1000 matrix, kernel 10x10, stride (2,2)
+Generating random 1000x1000 input and 10x10 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 10x10, Stride: 2x2
+Output size: 500x500
+Total time: 0.005438 seconds
+
+[96 threads] 1000x1000 matrix, kernel 10x10, stride (3,3)
+Generating random 1000x1000 input and 10x10 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 10x10, Stride: 3x3
+Output size: 334x334
+Total time: 0.005244 seconds
+
+[96 threads] 1000x1000 matrix, kernel 10x10, stride (5,5)
+Generating random 1000x1000 input and 10x10 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 10x10, Stride: 5x5
+Output size: 200x200
+Total time: 0.004907 seconds
+
+[96 threads] 1000x1000 matrix, kernel 10x10, stride (10,10)
+Generating random 1000x1000 input and 10x10 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 10x10, Stride: 10x10
+Output size: 100x100
+Total time: 0.004503 seconds
+
+--- 1000x1000 matrix, kernel 100x100 ---
+
+[96 threads] 1000x1000 matrix, kernel 100x100, stride (2,2)
+Generating random 1000x1000 input and 100x100 kernel with stride 2x2
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 100x100, Stride: 2x2
+Output size: 500x500
+Total time: 0.033955 seconds
+
+[96 threads] 1000x1000 matrix, kernel 100x100, stride (3,3)
+Generating random 1000x1000 input and 100x100 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 100x100, Stride: 3x3
+Output size: 334x334
+Total time: 0.017907 seconds
+
+[96 threads] 1000x1000 matrix, kernel 100x100, stride (5,5)
+Generating random 1000x1000 input and 100x100 kernel with stride 5x5
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 100x100, Stride: 5x5
+Output size: 200x200
+Total time: 0.009474 seconds
+
+[96 threads] 1000x1000 matrix, kernel 100x100, stride (10,10)
+Generating random 1000x1000 input and 100x100 kernel with stride 10x10
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 1000x1000, Kernel: 100x100, Stride: 10x10
+Output size: 100x100
+Total time: 0.006340 seconds
+
+==========================================
+Job completed at: Tue Oct  7 06:44:51 PM AWST 2025
+==========================================

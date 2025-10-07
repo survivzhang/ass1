@@ -3,6 +3,10 @@ CITS5507 Assignment 2 - All Test Commands
 Group Member: Jiazheng Guo(24070858), Zichen Zhang(24064091)
 ========================================
 
+=== OpenMP Tests - Single Node (For Kaya) ===
+sbatch upload_and_test/slurm_sh/OpenMP_SH/test_openmp_baseline.sh
+sbatch upload_and_test/slurm_sh/OpenMP_SH/test_openmp_stride.sh
+
 === Pure MPI Tests (Baseline: stride 1,1) ===
 sbatch upload_and_test/slurm_sh/MPI_SH/test_2nodes.sh
 sbatch upload_and_test/slurm_sh/MPI_SH/test_3nodes.sh
@@ -24,7 +28,29 @@ sbatch upload_and_test/slurm_sh/Hybrid_SH/test_3nodes_stride.sh
 sbatch upload_and_test/slurm_sh/Hybrid_SH/test_4nodes_stride.sh
 
 ========================================
-Total: 12 test scripts
+Total: 14 test scripts
+- 2 OpenMP tests (single node baseline)
+- 12 MPI/Hybrid tests (multi-node)
+========================================
+
+Thread counts tested (OpenMP): 1, 2, 4, 8, 16, 32, 64, 96
+Core counts tested (MPI/Hybrid):
+  - 2 nodes: 2, 4, 8, 16, 32, 64, 96
+  - 3 nodes: 3, 6, 12, 24, 48, 96
+  - 4 nodes: 4, 8, 16, 32, 64, 96
+
+Matrix configurations:
+  - 100×100, kernel 3×3
+  - 1000×1000, kernel 3×3
+  - 10000×10000, kernel 3×3
+  - 1000×1000, kernel 10×10
+  - 1000×1000, kernel 100×100
+
+Stride values (stride tests):
+  - (2, 2), (3, 3), (5, 5), (10, 10)
+
+========================================
+Commands:
 ========================================
 
 Check job status:
@@ -36,15 +62,12 @@ scancel -u $USER
 View output files:
 ls -lht *.out *.err | head -20
 
-sbatch upload_and_test/slurm_sh/MPI_SH/test_2nodes.sh
-sbatch upload_and_test/slurm_sh/MPI_SH/test_3nodes.sh
-sbatch upload_and_test/slurm_sh/MPI_SH/test_4nodes.sh
-sbatch upload_and_test/slurm_sh/MPI_SH/test_2nodes_stride.sh
-sbatch upload_and_test/slurm_sh/MPI_SH/test_3nodes_stride.sh
-sbatch upload_and_test/slurm_sh/MPI_SH/test_4nodes_stride.sh
-sbatch upload_and_test/slurm_sh/Hybrid_SH/test_2nodes.sh
-sbatch upload_and_test/slurm_sh/Hybrid_SH/test_3nodes.sh
-sbatch upload_and_test/slurm_sh/Hybrid_SH/test_4nodes.sh
-sbatch upload_and_test/slurm_sh/Hybrid_SH/test_2nodes_stride.sh
-sbatch upload_and_test/slurm_sh/Hybrid_SH/test_3nodes_stride.sh
-sbatch upload_and_test/slurm_sh/Hybrid_SH/test_4nodes_stride.sh
+========================================
+Notes:
+========================================
+1. OpenMP tests should run on Kaya (single node)
+2. MPI/Hybrid tests can run on Setonix or Kaya
+3. Remember to update the path in OpenMP scripts:
+   cd /path/to/your/upload_and_test
+4. For Setonix, use partition: work or debug
+5. For Kaya, use partition: cits3402
