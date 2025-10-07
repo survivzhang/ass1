@@ -173,15 +173,18 @@ int main(int argc, char **argv) {
     int out_W = (W + sW - 1) / sW;
     output = allocate_2d_array(out_H, out_W);
 
-    // Timing
+    // Timing and performance statistics
     struct timespec start, end;
     double elapsed;
+    PerfStats stats;
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (rank == 0) {
         printf("Running %s mode: MPI processes=%d, OpenMP threads=%d\n",
                mode, size, omp_get_max_threads());
+        printf("Input size: %dx%d, Kernel: %dx%d, Stride: %dx%d\n",
+               H, W, kH, kW, sH, sW);
         printf("Output size: %dx%d\n", out_H, out_W);
     }
 
@@ -192,10 +195,10 @@ int main(int argc, char **argv) {
     } else if (strcmp(mode, "omp") == 0 && rank == 0) {
         conv2d_omp_stride(f, H, W, g, kH, kW, sH, sW, output);
     } else if (strcmp(mode, "mpi") == 0) {
-        conv2d_mpi_stride(f, H, W, g, kH, kW, sH, sW, output, MPI_COMM_WORLD);
+        conv2d_mpi_stride_stats(f, H, W, g, kH, kW, sH, sW, output, MPI_COMM_WORLD, &stats);
     } else {
         // hybrid (default)
-        conv2d_stride(f, H, W, g, kH, kW, sH, sW, output, MPI_COMM_WORLD);
+        conv2d_stride_stats(f, H, W, g, kH, kW, sH, sW, output, MPI_COMM_WORLD, &stats);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -204,7 +207,30 @@ int main(int argc, char **argv) {
     elapsed = get_time_diff(start, end);
 
     if (rank == 0) {
-        printf("Computation time: %.6f seconds\n", elapsed);
+        // Print detailed performance statistics for MPI and Hybrid modes
+        if (strcmp(mode, "mpi") == 0 || strcmp(mode, "hybrid") == 0) {
+            printf("\n");
+            printf("========================================\n");
+            printf("Performance Statistics\n");
+            printf("========================================\n");
+            printf("Total time:          %.6f seconds (100.0%%)\n", stats.total_time);
+            printf("Computation time:    %.6f seconds (%.1f%%)\n",
+                   stats.computation_time,
+                   stats.total_time > 0 ? 100.0 * stats.computation_time / stats.total_time : 0.0);
+            printf("Communication time:  %.6f seconds (%.1f%%)\n",
+                   stats.communication_time,
+                   stats.total_time > 0 ? 100.0 * stats.communication_time / stats.total_time : 0.0);
+            printf("  - Broadcast:       %.6f seconds\n", stats.broadcast_time);
+            printf("  - Memory copy:     %.6f seconds\n", stats.memory_copy_time);
+            printf("\n");
+            printf("Communication Statistics:\n");
+            printf("  - MPI_Bcast calls: %d\n", stats.num_communications);
+            printf("  - Bytes transferred: %.2f MB\n", stats.bytes_communicated / (1024.0 * 1024.0));
+            printf("  - Output elements: %lld\n", stats.output_elements);
+            printf("========================================\n");
+        } else {
+            printf("Total time: %.6f seconds\n", elapsed);
+        }
 
         if (output_file) {
             printf("Writing output to %s\n", output_file);

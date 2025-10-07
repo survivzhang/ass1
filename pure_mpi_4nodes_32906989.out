@@ -1,0 +1,14 @@
+==========================================
+Pure MPI Test - 4 Nodes
+==========================================
+Job started at: Tue Oct  7 02:56:56 AM AWST 2025
+Nodes: 4
+Mode: Pure MPI (no OpenMP)
+==========================================
+
+==========================================
+Testing with 4 cores (Pure MPI)
+==========================================
+MPI Processes: 4 (1 process per core, no OpenMP)
+
+[4 cores] 100x100 matrix, kernel 3x3

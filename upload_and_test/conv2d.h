@@ -43,4 +43,20 @@ void performance_analysis_threads(float **f, int H, int W, float **g, int kH, in
 // Timing utilities
 double get_time_diff(struct timespec start, struct timespec end);
 
+// Performance statistics structure
+typedef struct {
+    double total_time;
+    double computation_time;
+    double communication_time;
+    double broadcast_time;
+    double memory_copy_time;
+    long long output_elements;
+    long long bytes_communicated;
+    int num_communications;
+} PerfStats;
+
+// MPI implementations with performance statistics
+void conv2d_mpi_stride_stats(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm, PerfStats *stats);
+void conv2d_stride_stats(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm, PerfStats *stats);
+
 #endif // CONV2D_H

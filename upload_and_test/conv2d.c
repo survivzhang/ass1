@@ -580,3 +580,230 @@ void conv2d_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, i
         }
     }
 }
+
+/**
+ * MPI-only implementation with detailed performance statistics
+ */
+void conv2d_mpi_stride_stats(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm, PerfStats *stats) {
+    int rank, size;
+    MPI_Comm_rank(comm, &rank);
+    MPI_Comm_size(comm, &size);
+
+    // Initialize stats
+    stats->total_time = 0.0;
+    stats->computation_time = 0.0;
+    stats->communication_time = 0.0;
+    stats->broadcast_time = 0.0;
+    stats->memory_copy_time = 0.0;
+    stats->bytes_communicated = 0;
+    stats->num_communications = 0;
+
+    double t_start, t_comp_start, t_comm_start;
+    t_start = MPI_Wtime();
+
+    int pad_top = (kH - 1) / 2;
+    int pad_left = (kW - 1) / 2;
+
+    int out_H = (H + sH - 1) / sH;
+    int out_W = (W + sW - 1) / sW;
+
+    stats->output_elements = (long long)out_H * out_W;
+
+    // Distribute output rows among processes
+    int rows_per_proc = (out_H + size - 1) / size;
+    int local_start = rank * rows_per_proc;
+    int local_end = (rank + 1) * rows_per_proc;
+    if (local_end > out_H) local_end = out_H;
+    int local_rows = local_end - local_start;
+
+    // Compute local output only if this process has rows assigned
+    if (local_rows > 0) {
+        // Calculate input region needed (with halo)
+        int input_start = local_start * sH - pad_top;
+        int input_end = (local_end - 1) * sH + kH - pad_top;
+
+        // Clamp to valid input range
+        if (input_start < 0) input_start = 0;
+        if (input_end > H) input_end = H;
+        int input_rows = input_end - input_start;
+
+        // Allocate local input buffer if needed
+        float **local_f = NULL;
+        if (size > 1) {
+            t_comm_start = MPI_Wtime();
+            local_f = allocate_2d_array(input_rows, W);
+
+            // Gather required input rows (memory copy)
+            for (int i = 0; i < input_rows; i++) {
+                memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+            }
+            stats->memory_copy_time += MPI_Wtime() - t_comm_start;
+            stats->bytes_communicated += (long long)input_rows * W * sizeof(float);
+        } else {
+            local_f = f;
+        }
+
+        // Compute local output
+        t_comp_start = MPI_Wtime();
+        for (int out_i = 0; out_i < local_rows; out_i++) {
+            for (int out_j = 0; out_j < out_W; out_j++) {
+                float sum = 0.0f;
+                int i = (local_start + out_i) * sH;
+                int j = out_j * sW;
+
+                for (int ki = 0; ki < kH; ki++) {
+                    for (int kj = 0; kj < kW; kj++) {
+                        int input_i = i + ki - pad_top;
+                        int input_j = j + kj - pad_left;
+
+                        if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                            int local_i = input_i - input_start;
+                            sum += local_f[local_i][input_j] * g[ki][kj];
+                        }
+                    }
+                }
+                output[local_start + out_i][out_j] = sum;
+            }
+        }
+        stats->computation_time += MPI_Wtime() - t_comp_start;
+
+        if (size > 1) {
+            free_2d_array(local_f, input_rows);
+        }
+    }
+
+    // Gather results to all processes
+    if (size > 1) {
+        t_comm_start = MPI_Wtime();
+        for (int p = 0; p < size; p++) {
+            int p_start = p * rows_per_proc;
+            int p_end = (p + 1) * rows_per_proc;
+            if (p_end > out_H) p_end = out_H;
+            int p_rows = p_end - p_start;
+
+            // All processes participate, even if p_rows is 0
+            for (int i = 0; i < p_rows; i++) {
+                MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
+                stats->num_communications++;
+                stats->bytes_communicated += (long long)out_W * sizeof(float);
+            }
+        }
+        stats->broadcast_time = MPI_Wtime() - t_comm_start;
+        stats->communication_time = stats->broadcast_time + stats->memory_copy_time;
+    }
+
+    stats->total_time = MPI_Wtime() - t_start;
+}
+
+/**
+ * Hybrid MPI+OpenMP implementation with detailed performance statistics
+ */
+void conv2d_stride_stats(float **f, int H, int W, float **g, int kH, int kW, int sH, int sW, float **output, MPI_Comm comm, PerfStats *stats) {
+    int rank, size;
+    MPI_Comm_rank(comm, &rank);
+    MPI_Comm_size(comm, &size);
+
+    // Initialize stats
+    stats->total_time = 0.0;
+    stats->computation_time = 0.0;
+    stats->communication_time = 0.0;
+    stats->broadcast_time = 0.0;
+    stats->memory_copy_time = 0.0;
+    stats->bytes_communicated = 0;
+    stats->num_communications = 0;
+
+    double t_start, t_comp_start, t_comm_start;
+    t_start = MPI_Wtime();
+
+    int pad_top = (kH - 1) / 2;
+    int pad_left = (kW - 1) / 2;
+
+    int out_H = (H + sH - 1) / sH;
+    int out_W = (W + sW - 1) / sW;
+
+    stats->output_elements = (long long)out_H * out_W;
+
+    // Distribute output rows among processes
+    int rows_per_proc = (out_H + size - 1) / size;
+    int local_start = rank * rows_per_proc;
+    int local_end = (rank + 1) * rows_per_proc;
+    if (local_end > out_H) local_end = out_H;
+    int local_rows = local_end - local_start;
+
+    // Compute local output only if this process has rows assigned
+    if (local_rows > 0) {
+        // Calculate input region needed (with halo)
+        int input_start = local_start * sH - pad_top;
+        int input_end = (local_end - 1) * sH + kH - pad_top;
+
+        if (input_start < 0) input_start = 0;
+        if (input_end > H) input_end = H;
+        int input_rows = input_end - input_start;
+
+        // Allocate local input buffer if needed
+        float **local_f = NULL;
+        if (size > 1) {
+            t_comm_start = MPI_Wtime();
+            local_f = allocate_2d_array(input_rows, W);
+
+            for (int i = 0; i < input_rows; i++) {
+                memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+            }
+            stats->memory_copy_time += MPI_Wtime() - t_comm_start;
+            stats->bytes_communicated += (long long)input_rows * W * sizeof(float);
+        } else {
+            local_f = f;
+        }
+
+        // Compute local output with OpenMP parallelization
+        t_comp_start = MPI_Wtime();
+        #pragma omp parallel for schedule(dynamic, 16) collapse(2)
+        for (int out_i = 0; out_i < local_rows; out_i++) {
+            for (int out_j = 0; out_j < out_W; out_j++) {
+                float sum = 0.0f;
+                int i = (local_start + out_i) * sH;
+                int j = out_j * sW;
+
+                for (int ki = 0; ki < kH; ki++) {
+                    for (int kj = 0; kj < kW; kj++) {
+                        int input_i = i + ki - pad_top;
+                        int input_j = j + kj - pad_left;
+
+                        if (input_i >= 0 && input_i < H && input_j >= 0 && input_j < W) {
+                            int local_i = input_i - input_start;
+                            sum += local_f[local_i][input_j] * g[ki][kj];
+                        }
+                    }
+                }
+                output[local_start + out_i][out_j] = sum;
+            }
+        }
+        stats->computation_time += MPI_Wtime() - t_comp_start;
+
+        if (size > 1) {
+            free_2d_array(local_f, input_rows);
+        }
+    }
+
+    // Gather results to all processes
+    if (size > 1) {
+        t_comm_start = MPI_Wtime();
+        for (int p = 0; p < size; p++) {
+            int p_start = p * rows_per_proc;
+            int p_end = (p + 1) * rows_per_proc;
+            if (p_end > out_H) p_end = out_H;
+            int p_rows = p_end - p_start;
+
+            // All processes participate, even if p_rows is 0
+            for (int i = 0; i < p_rows; i++) {
+                MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
+                stats->num_communications++;
+                stats->bytes_communicated += (long long)out_W * sizeof(float);
+            }
+        }
+        stats->broadcast_time = MPI_Wtime() - t_comm_start;
+        stats->communication_time = stats->broadcast_time + stats->memory_copy_time;
+    }
+
+    stats->total_time = MPI_Wtime() - t_start;
+}

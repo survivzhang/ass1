@@ -1,0 +1,17 @@
+==========================================
+Pure MPI Stride Test - 3 Nodes
+==========================================
+Job started at: Tue Oct  7 02:56:56 AM AWST 2025
+Nodes: 3
+Mode: Pure MPI (no OpenMP)
+Testing different stride values
+==========================================
+
+==========================================
+Testing with 3 cores (Pure MPI)
+==========================================
+MPI Processes: 3 (1 process per core, no OpenMP)
+
+--- 100x100 matrix, kernel 3x3 ---
+
+[3 cores] 100x100 matrix, kernel 3x3, stride (2,2)

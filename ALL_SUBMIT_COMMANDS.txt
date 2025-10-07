@@ -1,0 +1,50 @@
+========================================
+CITS5507 Assignment 2 - All Test Commands
+Group Member: Jiazheng Guo(24070858), Zichen Zhang(24064091)
+========================================
+
+=== Pure MPI Tests (Baseline: stride 1,1) ===
+sbatch upload_and_test/slurm_sh/MPI_SH/test_2nodes.sh
+sbatch upload_and_test/slurm_sh/MPI_SH/test_3nodes.sh
+sbatch upload_and_test/slurm_sh/MPI_SH/test_4nodes.sh
+
+=== Pure MPI Tests (Stride variations: 2,2 / 3,3 / 5,5 / 10,10) ===
+sbatch upload_and_test/slurm_sh/MPI_SH/test_2nodes_stride.sh
+sbatch upload_and_test/slurm_sh/MPI_SH/test_3nodes_stride.sh
+sbatch upload_and_test/slurm_sh/MPI_SH/test_4nodes_stride.sh
+
+=== Hybrid MPI+OpenMP Tests (Baseline: stride 1,1) ===
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_2nodes.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_3nodes.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_4nodes.sh
+
+=== Hybrid MPI+OpenMP Tests (Stride variations: 2,2 / 3,3 / 5,5 / 10,10) ===
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_2nodes_stride.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_3nodes_stride.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_4nodes_stride.sh
+
+========================================
+Total: 12 test scripts
+========================================
+
+Check job status:
+squeue -u $USER
+
+Cancel all jobs:
+scancel -u $USER
+
+View output files:
+ls -lht *.out *.err | head -20
+
+sbatch upload_and_test/slurm_sh/MPI_SH/test_2nodes.sh
+sbatch upload_and_test/slurm_sh/MPI_SH/test_3nodes.sh
+sbatch upload_and_test/slurm_sh/MPI_SH/test_4nodes.sh
+sbatch upload_and_test/slurm_sh/MPI_SH/test_2nodes_stride.sh
+sbatch upload_and_test/slurm_sh/MPI_SH/test_3nodes_stride.sh
+sbatch upload_and_test/slurm_sh/MPI_SH/test_4nodes_stride.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_2nodes.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_3nodes.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_4nodes.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_2nodes_stride.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_3nodes_stride.sh
+sbatch upload_and_test/slurm_sh/Hybrid_SH/test_4nodes_stride.sh

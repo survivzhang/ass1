@@ -1,0 +1,762 @@
+==========================================
+Hybrid MPI+OpenMP Test - 2 Nodes
+==========================================
+Job started at: Tue Oct  7 02:56:57 AM AWST 2025
+Nodes: 2
+Mode: Hybrid (MPI + OpenMP)
+==========================================
+
+==========================================
+Testing with 2 cores (Hybrid)
+==========================================
+MPI Processes: 2, OpenMP Threads per process: 1
+
+[2 cores] 100x100 matrix, kernel 3x3
+
+[2 cores] 1000x1000 matrix, kernel 3x3
+Generating random 1000x1000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=2, OpenMP threads=1
+Input size: 1000x1000, Kernel: 3x3, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.022293 seconds (100.0%)
+Computation time:    0.005447 seconds (24.4%)
+Communication time:  0.016665 seconds (74.8%)
+  - Broadcast:       0.015606 seconds
+  - Memory copy:     0.001059 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 5.73 MB
+  - Output elements: 1000000
+========================================
+
+[2 cores] 10000x10000 matrix, kernel 3x3
+Generating random 10000x10000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=2, OpenMP threads=1
+Input size: 10000x10000, Kernel: 3x3, Stride: 1x1
+Output size: 10000x10000
+
+========================================
+Performance Statistics
+========================================
+Total time:          1.038322 seconds (100.0%)
+Computation time:    0.609441 seconds (58.7%)
+Communication time:  0.416130 seconds (40.1%)
+  - Broadcast:       0.312300 seconds
+  - Memory copy:     0.103831 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 10000
+  - Bytes transferred: 572.24 MB
+  - Output elements: 100000000
+========================================
+
+[2 cores] 1000x1000 matrix, kernel 10x10
+Generating random 1000x1000 input and 10x10 kernel with stride 1x1
+Running hybrid mode: MPI processes=2, OpenMP threads=1
+Input size: 1000x1000, Kernel: 10x10, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.062039 seconds (100.0%)
+Computation time:    0.044742 seconds (72.1%)
+Communication time:  0.017108 seconds (27.6%)
+  - Broadcast:       0.016035 seconds
+  - Memory copy:     0.001073 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 5.74 MB
+  - Output elements: 1000000
+========================================
+
+[2 cores] 1000x1000 matrix, kernel 100x100
+Generating random 1000x1000 input and 100x100 kernel with stride 1x1
+Running hybrid mode: MPI processes=2, OpenMP threads=1
+Input size: 1000x1000, Kernel: 100x100, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          4.254997 seconds (100.0%)
+Computation time:    4.237798 seconds (99.6%)
+Communication time:  0.016970 seconds (0.4%)
+  - Broadcast:       0.015798 seconds
+  - Memory copy:     0.001172 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 5.91 MB
+  - Output elements: 1000000
+========================================
+
+==========================================
+Testing with 4 cores (Hybrid)
+==========================================
+MPI Processes: 2, OpenMP Threads per process: 2
+
+[4 cores] 100x100 matrix, kernel 3x3
+Generating random 100x100 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=2, OpenMP threads=2
+Input size: 100x100, Kernel: 3x3, Stride: 1x1
+Output size: 100x100
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.000648 seconds (100.0%)
+Computation time:    0.000160 seconds (24.6%)
+Communication time:  0.000486 seconds (75.0%)
+  - Broadcast:       0.000472 seconds
+  - Memory copy:     0.000014 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 100
+  - Bytes transferred: 0.06 MB
+  - Output elements: 10000
+========================================
+
+[4 cores] 1000x1000 matrix, kernel 3x3
+Generating random 1000x1000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=2, OpenMP threads=2
+Input size: 1000x1000, Kernel: 3x3, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.022627 seconds (100.0%)
+Computation time:    0.005483 seconds (24.2%)
+Communication time:  0.017134 seconds (75.7%)
+  - Broadcast:       0.016064 seconds
+  - Memory copy:     0.001070 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 5.73 MB
+  - Output elements: 1000000
+========================================
+
+[4 cores] 10000x10000 matrix, kernel 3x3
+Generating random 10000x10000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=2, OpenMP threads=2
+Input size: 10000x10000, Kernel: 3x3, Stride: 1x1
+Output size: 10000x10000
+
+========================================
+Performance Statistics
+========================================
+Total time:          1.024304 seconds (100.0%)
+Computation time:    0.609366 seconds (59.5%)
+Communication time:  0.414851 seconds (40.5%)
+  - Broadcast:       0.311038 seconds
+  - Memory copy:     0.103813 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 10000
+  - Bytes transferred: 572.24 MB
+  - Output elements: 100000000
+========================================
+
+[4 cores] 1000x1000 matrix, kernel 10x10
+Generating random 1000x1000 input and 10x10 kernel with stride 1x1
+Running hybrid mode: MPI processes=2, OpenMP threads=2
+Input size: 1000x1000, Kernel: 10x10, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.062221 seconds (100.0%)
+Computation time:    0.045379 seconds (72.9%)
+Communication time:  0.016832 seconds (27.1%)
+  - Broadcast:       0.015826 seconds
+  - Memory copy:     0.001006 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 5.74 MB
+  - Output elements: 1000000
+========================================
+
+[4 cores] 1000x1000 matrix, kernel 100x100
+Generating random 1000x1000 input and 100x100 kernel with stride 1x1
+Running hybrid mode: MPI processes=2, OpenMP threads=2
+Input size: 1000x1000, Kernel: 100x100, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          4.260909 seconds (100.0%)
+Computation time:    4.243774 seconds (99.6%)
+Communication time:  0.017122 seconds (0.4%)
+  - Broadcast:       0.016029 seconds
+  - Memory copy:     0.001093 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 5.91 MB
+  - Output elements: 1000000
+========================================
+
+==========================================
+Testing with 8 cores (Hybrid)
+==========================================
+MPI Processes: 4, OpenMP Threads per process: 2
+
+[8 cores] 100x100 matrix, kernel 3x3
+Generating random 100x100 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=2
+Input size: 100x100, Kernel: 3x3, Stride: 1x1
+Output size: 100x100
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.000824 seconds (100.0%)
+Computation time:    0.000146 seconds (17.7%)
+Communication time:  0.000676 seconds (82.1%)
+  - Broadcast:       0.000668 seconds
+  - Memory copy:     0.000008 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 100
+  - Bytes transferred: 0.05 MB
+  - Output elements: 10000
+========================================
+
+[8 cores] 1000x1000 matrix, kernel 3x3
+Generating random 1000x1000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=2
+Input size: 1000x1000, Kernel: 3x3, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.023295 seconds (100.0%)
+Computation time:    0.002730 seconds (11.7%)
+Communication time:  0.020559 seconds (88.3%)
+  - Broadcast:       0.020043 seconds
+  - Memory copy:     0.000516 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.77 MB
+  - Output elements: 1000000
+========================================
+
+[8 cores] 10000x10000 matrix, kernel 3x3
+Generating random 10000x10000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=2
+Input size: 10000x10000, Kernel: 3x3, Stride: 1x1
+Output size: 10000x10000
+
+========================================
+Performance Statistics
+========================================
+Total time:          1.431066 seconds (100.0%)
+Computation time:    0.306684 seconds (21.4%)
+Communication time:  1.124336 seconds (78.6%)
+  - Broadcast:       1.071621 seconds
+  - Memory copy:     0.052715 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 10000
+  - Bytes transferred: 476.88 MB
+  - Output elements: 100000000
+========================================
+
+[8 cores] 1000x1000 matrix, kernel 10x10
+Generating random 1000x1000 input and 10x10 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=2
+Input size: 1000x1000, Kernel: 10x10, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.042965 seconds (100.0%)
+Computation time:    0.022420 seconds (52.2%)
+Communication time:  0.020540 seconds (47.8%)
+  - Broadcast:       0.020018 seconds
+  - Memory copy:     0.000522 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.79 MB
+  - Output elements: 1000000
+========================================
+
+[8 cores] 1000x1000 matrix, kernel 100x100
+Generating random 1000x1000 input and 100x100 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=2
+Input size: 1000x1000, Kernel: 100x100, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          2.196787 seconds (100.0%)
+Computation time:    2.070292 seconds (94.2%)
+Communication time:  0.126488 seconds (5.8%)
+  - Broadcast:       0.125850 seconds
+  - Memory copy:     0.000638 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.96 MB
+  - Output elements: 1000000
+========================================
+
+==========================================
+Testing with 16 cores (Hybrid)
+==========================================
+MPI Processes: 4, OpenMP Threads per process: 4
+
+[16 cores] 100x100 matrix, kernel 3x3
+Generating random 100x100 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=4
+Input size: 100x100, Kernel: 3x3, Stride: 1x1
+Output size: 100x100
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.000923 seconds (100.0%)
+Computation time:    0.000242 seconds (26.2%)
+Communication time:  0.000679 seconds (73.6%)
+  - Broadcast:       0.000671 seconds
+  - Memory copy:     0.000008 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 100
+  - Bytes transferred: 0.05 MB
+  - Output elements: 10000
+========================================
+
+[16 cores] 1000x1000 matrix, kernel 3x3
+Generating random 1000x1000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=4
+Input size: 1000x1000, Kernel: 3x3, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.023434 seconds (100.0%)
+Computation time:    0.002884 seconds (12.3%)
+Communication time:  0.020543 seconds (87.7%)
+  - Broadcast:       0.020010 seconds
+  - Memory copy:     0.000533 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.77 MB
+  - Output elements: 1000000
+========================================
+
+[16 cores] 10000x10000 matrix, kernel 3x3
+Generating random 10000x10000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=4
+Input size: 10000x10000, Kernel: 3x3, Stride: 1x1
+Output size: 10000x10000
+
+========================================
+Performance Statistics
+========================================
+Total time:          1.426083 seconds (100.0%)
+Computation time:    0.307118 seconds (21.5%)
+Communication time:  1.118921 seconds (78.5%)
+  - Broadcast:       1.065741 seconds
+  - Memory copy:     0.053179 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 10000
+  - Bytes transferred: 476.88 MB
+  - Output elements: 100000000
+========================================
+
+[16 cores] 1000x1000 matrix, kernel 10x10
+Generating random 1000x1000 input and 10x10 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=4
+Input size: 1000x1000, Kernel: 10x10, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.044063 seconds (100.0%)
+Computation time:    0.023477 seconds (53.3%)
+Communication time:  0.020580 seconds (46.7%)
+  - Broadcast:       0.020047 seconds
+  - Memory copy:     0.000533 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.79 MB
+  - Output elements: 1000000
+========================================
+
+[16 cores] 1000x1000 matrix, kernel 100x100
+Generating random 1000x1000 input and 100x100 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=4
+Input size: 1000x1000, Kernel: 100x100, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          2.195068 seconds (100.0%)
+Computation time:    2.068258 seconds (94.2%)
+Communication time:  0.126802 seconds (5.8%)
+  - Broadcast:       0.126170 seconds
+  - Memory copy:     0.000632 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.96 MB
+  - Output elements: 1000000
+========================================
+
+==========================================
+Testing with 32 cores (Hybrid)
+==========================================
+MPI Processes: 8, OpenMP Threads per process: 4
+
+[32 cores] 100x100 matrix, kernel 3x3
+Generating random 100x100 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=4
+Input size: 100x100, Kernel: 3x3, Stride: 1x1
+Output size: 100x100
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.001118 seconds (100.0%)
+Computation time:    0.000244 seconds (21.8%)
+Communication time:  0.000873 seconds (78.1%)
+  - Broadcast:       0.000868 seconds
+  - Memory copy:     0.000005 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 100
+  - Bytes transferred: 0.04 MB
+  - Output elements: 10000
+========================================
+
+[32 cores] 1000x1000 matrix, kernel 3x3
+Generating random 1000x1000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=4
+Input size: 1000x1000, Kernel: 3x3, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.024888 seconds (100.0%)
+Computation time:    0.001673 seconds (6.7%)
+Communication time:  0.023211 seconds (93.3%)
+  - Broadcast:       0.022959 seconds
+  - Memory copy:     0.000253 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.30 MB
+  - Output elements: 1000000
+========================================
+
+[32 cores] 10000x10000 matrix, kernel 3x3
+Generating random 10000x10000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=4
+Input size: 10000x10000, Kernel: 3x3, Stride: 1x1
+Output size: 10000x10000
+
+========================================
+Performance Statistics
+========================================
+Total time:          1.544582 seconds (100.0%)
+Computation time:    0.152587 seconds (9.9%)
+Communication time:  1.391972 seconds (90.1%)
+  - Broadcast:       1.365362 seconds
+  - Memory copy:     0.026610 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 10000
+  - Bytes transferred: 429.19 MB
+  - Output elements: 100000000
+========================================
+
+[32 cores] 1000x1000 matrix, kernel 10x10
+Generating random 1000x1000 input and 10x10 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=4
+Input size: 1000x1000, Kernel: 10x10, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.034876 seconds (100.0%)
+Computation time:    0.011737 seconds (33.7%)
+Communication time:  0.023136 seconds (66.3%)
+  - Broadcast:       0.022869 seconds
+  - Memory copy:     0.000267 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.31 MB
+  - Output elements: 1000000
+========================================
+
+[32 cores] 1000x1000 matrix, kernel 100x100
+Generating random 1000x1000 input and 100x100 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=4
+Input size: 1000x1000, Kernel: 100x100, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          1.110464 seconds (100.0%)
+Computation time:    0.980291 seconds (88.3%)
+Communication time:  0.130168 seconds (11.7%)
+  - Broadcast:       0.129826 seconds
+  - Memory copy:     0.000342 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.48 MB
+  - Output elements: 1000000
+========================================
+
+==========================================
+Testing with 64 cores (Hybrid)
+==========================================
+MPI Processes: 8, OpenMP Threads per process: 8
+
+[64 cores] 100x100 matrix, kernel 3x3
+Generating random 100x100 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=8
+Input size: 100x100, Kernel: 3x3, Stride: 1x1
+Output size: 100x100
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.001278 seconds (100.0%)
+Computation time:    0.000399 seconds (31.3%)
+Communication time:  0.000877 seconds (68.6%)
+  - Broadcast:       0.000871 seconds
+  - Memory copy:     0.000005 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 100
+  - Bytes transferred: 0.04 MB
+  - Output elements: 10000
+========================================
+
+[64 cores] 1000x1000 matrix, kernel 3x3
+Generating random 1000x1000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=8
+Input size: 1000x1000, Kernel: 3x3, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.024938 seconds (100.0%)
+Computation time:    0.001800 seconds (7.2%)
+Communication time:  0.023135 seconds (92.8%)
+  - Broadcast:       0.022881 seconds
+  - Memory copy:     0.000254 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.30 MB
+  - Output elements: 1000000
+========================================
+
+[64 cores] 10000x10000 matrix, kernel 3x3
+Generating random 10000x10000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=8
+Input size: 10000x10000, Kernel: 3x3, Stride: 1x1
+Output size: 10000x10000
+
+========================================
+Performance Statistics
+========================================
+Total time:          1.537644 seconds (100.0%)
+Computation time:    0.152817 seconds (9.9%)
+Communication time:  1.384801 seconds (90.1%)
+  - Broadcast:       1.358242 seconds
+  - Memory copy:     0.026559 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 10000
+  - Bytes transferred: 429.19 MB
+  - Output elements: 100000000
+========================================
+
+[64 cores] 1000x1000 matrix, kernel 10x10
+Generating random 1000x1000 input and 10x10 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=8
+Input size: 1000x1000, Kernel: 10x10, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.034756 seconds (100.0%)
+Computation time:    0.011637 seconds (33.5%)
+Communication time:  0.023115 seconds (66.5%)
+  - Broadcast:       0.022858 seconds
+  - Memory copy:     0.000257 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.31 MB
+  - Output elements: 1000000
+========================================
+
+[64 cores] 1000x1000 matrix, kernel 100x100
+Generating random 1000x1000 input and 100x100 kernel with stride 1x1
+Running hybrid mode: MPI processes=8, OpenMP threads=8
+Input size: 1000x1000, Kernel: 100x100, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          1.109845 seconds (100.0%)
+Computation time:    0.973861 seconds (87.7%)
+Communication time:  0.135979 seconds (12.3%)
+  - Broadcast:       0.135635 seconds
+  - Memory copy:     0.000344 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.48 MB
+  - Output elements: 1000000
+========================================
+
+==========================================
+Testing with 96 cores (Hybrid)
+==========================================
+MPI Processes: 12, OpenMP Threads per process: 8
+
+[96 cores] 100x100 matrix, kernel 3x3
+Generating random 100x100 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=12, OpenMP threads=8
+Input size: 100x100, Kernel: 3x3, Stride: 1x1
+Output size: 100x100
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.001403 seconds (100.0%)
+Computation time:    0.000436 seconds (31.1%)
+Communication time:  0.000966 seconds (68.8%)
+  - Broadcast:       0.000962 seconds
+  - Memory copy:     0.000004 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 100
+  - Bytes transferred: 0.04 MB
+  - Output elements: 10000
+========================================
+
+[96 cores] 1000x1000 matrix, kernel 3x3
+Generating random 1000x1000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=12, OpenMP threads=8
+Input size: 1000x1000, Kernel: 3x3, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.026937 seconds (100.0%)
+Computation time:    0.001365 seconds (5.1%)
+Communication time:  0.025570 seconds (94.9%)
+  - Broadcast:       0.025404 seconds
+  - Memory copy:     0.000165 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.14 MB
+  - Output elements: 1000000
+========================================
+
+[96 cores] 10000x10000 matrix, kernel 3x3
+Generating random 10000x10000 input and 3x3 kernel with stride 1x1
+Running hybrid mode: MPI processes=12, OpenMP threads=8
+Input size: 10000x10000, Kernel: 3x3, Stride: 1x1
+Output size: 10000x10000
+
+========================================
+Performance Statistics
+========================================
+Total time:          1.561331 seconds (100.0%)
+Computation time:    0.102206 seconds (6.5%)
+Communication time:  1.459106 seconds (93.5%)
+  - Broadcast:       1.441062 seconds
+  - Memory copy:     0.018044 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 10000
+  - Bytes transferred: 413.32 MB
+  - Output elements: 100000000
+========================================
+
+[96 cores] 1000x1000 matrix, kernel 10x10
+Generating random 1000x1000 input and 10x10 kernel with stride 1x1
+Running hybrid mode: MPI processes=12, OpenMP threads=8
+Input size: 1000x1000, Kernel: 10x10, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.032986 seconds (100.0%)
+Computation time:    0.007816 seconds (23.7%)
+Communication time:  0.025167 seconds (76.3%)
+  - Broadcast:       0.024977 seconds
+  - Memory copy:     0.000190 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.15 MB
+  - Output elements: 1000000
+========================================
+
+[96 cores] 1000x1000 matrix, kernel 100x100
+Generating random 1000x1000 input and 100x100 kernel with stride 1x1
+Running hybrid mode: MPI processes=12, OpenMP threads=8
+Input size: 1000x1000, Kernel: 100x100, Stride: 1x1
+Output size: 1000x1000
+
+========================================
+Performance Statistics
+========================================
+Total time:          0.757438 seconds (100.0%)
+Computation time:    0.621016 seconds (82.0%)
+Communication time:  0.136418 seconds (18.0%)
+  - Broadcast:       0.136151 seconds
+  - Memory copy:     0.000267 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 1000
+  - Bytes transferred: 4.33 MB
+  - Output elements: 1000000
+========================================
+
+==========================================
+Job completed at: Tue Oct  7 03:07:56 AM AWST 2025
+==========================================
