@@ -1,0 +1,92 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    SLURM TEST SUBMISSION - QUICK START                    ║
+║        20000×20000 Matrix with 200×200 Kernel Test Suite                 ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+Group Members: Jiazheng Guo (24070858), Zichen Zhang (24064091)
+
+═══════════════════════════════════════════════════════════════════════════
+
+📋 WHAT YOU HAVE:
+   • 57 test scripts across 4 folders
+   • OpenMP_SH: 16 scripts
+   • MPI_SH: 15 scripts
+   • Hybrid_SH: 15 scripts
+   • Hybrid_Distribution: 11 scripts
+
+═══════════════════════════════════════════════════════════════════════════
+
+🚀 QUICK COMMANDS:
+
+   Submit everything:
+   $ bash submit_all_20000_tests.sh
+
+   Submit by type:
+   $ bash submit_all_20000_tests.sh openmp
+   $ bash submit_all_20000_tests.sh mpi
+   $ bash submit_all_20000_tests.sh hybrid
+   $ bash submit_all_20000_tests.sh hybrid_dist
+
+   Submit baseline only (fastest):
+   $ bash submit_baseline_tests.sh
+
+   Submit stride tests:
+   $ bash submit_stride_tests.sh
+
+   Submit hybrid distributions:
+   $ bash submit_hybrid_distributions.sh
+
+═══════════════════════════════════════════════════════════════════════════
+
+📊 MONITOR JOBS:
+
+   Check status:
+   $ squeue -u $USER
+
+   Watch in real-time:
+   $ watch -n 5 'squeue -u $USER'
+
+   View output:
+   $ tail -f output/<test_name>_<job_id>.out
+
+═══════════════════════════════════════════════════════════════════════════
+
+🛑 CANCEL JOBS:
+
+   Cancel all:
+   $ scancel -u $USER
+
+   Cancel one:
+   $ scancel <job_id>
+
+═══════════════════════════════════════════════════════════════════════════
+
+📁 OUTPUT LOCATION:
+   All results: output/*.out and output/*.err
+
+═══════════════════════════════════════════════════════════════════════════
+
+⏱️  ESTIMATED TIMES:
+   • Baseline tests: ~3-6 hours
+   • Stride tests: ~3-5 hours
+   • Hybrid distributions: ~2-4 hours
+   • Full suite: ~8-15 hours
+
+═══════════════════════════════════════════════════════════════════════════
+
+💡 RECOMMENDED APPROACH:
+
+   1. Start with baseline (most important):
+      $ bash submit_baseline_tests.sh
+
+   2. Then test strides:
+      $ bash submit_stride_tests.sh
+
+   3. Finally explore distributions:
+      $ bash submit_hybrid_distributions.sh all
+
+═══════════════════════════════════════════════════════════════════════════
+
+📖 For detailed documentation, see: README_SUBMISSION.md
+
+═══════════════════════════════════════════════════════════════════════════

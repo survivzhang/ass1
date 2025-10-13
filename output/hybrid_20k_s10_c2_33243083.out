@@ -1,0 +1,30 @@
+==========================================
+Hybrid MPI+OpenMP Test - 2 Nodes, 2 cores, stride (10,10)
+20000x20000 Matrix, Kernel 200x200
+==========================================
+Job started at: Mon Oct 13 10:10:52 AM AWST 2025
+MPI Processes: 2, OpenMP Threads: 1
+==========================================
+Generating random 20000x20000 input and 200x200 kernel with stride 10x10
+Running hybrid mode: MPI processes=2, OpenMP threads=1
+Input size: 20000x20000, Kernel: 200x200, Stride: 10x10
+Output size: 2000x2000
+
+========================================
+Performance Statistics
+========================================
+Total time:          72.569206 seconds (100.0%)
+Computation time:    72.064306 seconds (99.3%)
+Communication time:  0.456851 seconds (0.6%)
+  - Broadcast:       0.041971 seconds
+  - Memory copy:     0.414881 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 2000
+  - Bytes transferred: 785.14 MB
+  - Output elements: 4000000
+========================================
+
+==========================================
+Job completed at: Mon Oct 13 10:12:10 AM AWST 2025
+==========================================

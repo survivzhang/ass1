@@ -1,0 +1,32 @@
+==========================================
+Hybrid Distribution Test: 4×24
+20000x20000 Matrix, Kernel 200x200
+==========================================
+Job started at: Mon Oct 13 10:44:06 AM AWST 2025
+MPI Processes: 4, OpenMP Threads: 24
+Total cores: 96
+==========================================
+[4×24] 20000x20000 matrix, kernel 200x200
+Generating random 20000x20000 input and 200x200 kernel with stride 1x1
+Running hybrid mode: MPI processes=4, OpenMP threads=24
+Input size: 20000x20000, Kernel: 200x200, Stride: 1x1
+Output size: 20000x20000
+
+========================================
+Performance Statistics
+========================================
+Total time:          172.902799 seconds (100.0%)
+Computation time:    168.074430 seconds (97.2%)
+Communication time:  4.828199 seconds (2.8%)
+  - Broadcast:       4.616468 seconds
+  - Memory copy:     0.211731 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 20000
+  - Bytes transferred: 1914.98 MB
+  - Output elements: 400000000
+========================================
+
+==========================================
+Job completed at: Mon Oct 13 10:47:07 AM AWST 2025
+==========================================

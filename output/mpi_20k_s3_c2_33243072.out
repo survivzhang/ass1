@@ -1,0 +1,30 @@
+==========================================
+Pure MPI Test - 2 Nodes, 2 cores, stride (3,3)
+20000x20000 Matrix, Kernel 200x200
+==========================================
+Job started at: Mon Oct 13 09:53:16 AM AWST 2025
+MPI Processes: 2
+==========================================
+Generating random 20000x20000 input and 200x200 kernel with stride 3x3
+Running mpi mode: MPI processes=2, OpenMP threads=1
+Input size: 20000x20000, Kernel: 200x200, Stride: 3x3
+Output size: 6667x6667
+
+========================================
+Performance Statistics
+========================================
+Total time:          800.405522 seconds (100.0%)
+Computation time:    799.754431 seconds (99.9%)
+Communication time:  0.603043 seconds (0.1%)
+  - Broadcast:       0.185715 seconds
+  - Memory copy:     0.417328 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 6667
+  - Bytes transferred: 940.13 MB
+  - Output elements: 44448889
+========================================
+
+==========================================
+Job completed at: Mon Oct 13 10:06:43 AM AWST 2025
+==========================================

@@ -1,0 +1,107 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    COMPLETE TEST SUITE SUMMARY                            ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+Group Members: Jiazheng Guo (24070858), Zichen Zhang (24064091)
+Test Configuration: 20000×20000 Matrix with 200×200 Kernel
+
+═══════════════════════════════════════════════════════════════════════════
+
+TOTAL SCRIPTS CREATED: 57
+SUBMISSION SCRIPTS: 4
+DOCUMENTATION FILES: 3
+
+═══════════════════════════════════════════════════════════════════════════
+
+📂 DIRECTORY STRUCTURE:
+
+slurm_sh/
+├── OpenMP_SH/              (16 scripts)
+│   ├── Baseline stride (1,1): 8 scripts (t1, t2, t4, t8, t16, t32, t64, t96)
+│   └── Stride variations: 8 scripts
+│       ├── stride (2,2): t1 + loop t2-96
+│       ├── stride (3,3): t1 + loop t2-96
+│       ├── stride (5,5): t1 + loop t2-96
+│       └── stride (10,10): t1 + loop t2-96
+│
+├── MPI_SH/                 (15 scripts)
+│   ├── Baseline stride (1,1): 7 scripts (c2, c4, c8, c16, c32, c64, c96)
+│   └── Stride variations: 8 scripts
+│       ├── stride (2,2): c2 + loop c4-96
+│       ├── stride (3,3): c2 + loop c4-96
+│       ├── stride (5,5): c2 + loop c4-96
+│       └── stride (10,10): c2 + loop c4-96
+│
+├── Hybrid_SH/              (15 scripts)
+│   ├── Baseline stride (1,1): 7 scripts (c2, c4, c8, c16, c32, c64, c96)
+│   └── Stride variations: 8 scripts
+│       ├── stride (2,2): c2 + loop c4-96
+│       ├── stride (3,3): c2 + loop c4-96
+│       ├── stride (5,5): c2 + loop c4-96
+│       └── stride (10,10): c2 + loop c4-96
+│
+├── Hybrid_Distribution/    (11 scripts)
+│   ├── 2×48   (2 MPI × 48 OpenMP)
+│   ├── 3×32   (3 MPI × 32 OpenMP)
+│   ├── 4×24   (4 MPI × 24 OpenMP)
+│   ├── 6×16   (6 MPI × 16 OpenMP)
+│   ├── 8×12   (8 MPI × 12 OpenMP)
+│   ├── 12×8   (12 MPI × 8 OpenMP)
+│   ├── 16×6   (16 MPI × 6 OpenMP)
+│   ├── 24×4   (24 MPI × 4 OpenMP)
+│   ├── 32×3   (32 MPI × 3 OpenMP)
+│   ├── 48×2   (48 MPI × 2 OpenMP)
+│   └── all_dist.sh (tests all distributions in one job)
+│
+├── output/                 (output directory for all results)
+│
+└── Submission Scripts:
+    ├── submit_all_20000_tests.sh       (Main - submit by category)
+    ├── submit_baseline_tests.sh        (Baseline tests only)
+    ├── submit_stride_tests.sh          (Stride variations only)
+    └── submit_hybrid_distributions.sh  (Hybrid distributions)
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎯 KEY FEATURES:
+
+✓ All output files go to output/ folder
+✓ Loops in stride scripts reduce number of jobs
+✓ 2-hour time limit per job
+✓ Comprehensive distribution testing for hybrid mode
+✓ Easy submission with bash scripts
+✓ Organized by parallelization strategy
+
+═══════════════════════════════════════════════════════════════════════════
+
+📊 TEST COVERAGE:
+
+OpenMP:
+  • Thread counts: 1, 2, 4, 8, 16, 32, 64, 96
+  • Strides: (1,1), (2,2), (3,3), (5,5), (10,10)
+
+MPI (2 nodes):
+  • Core counts: 2, 4, 8, 16, 32, 64, 96
+  • Strides: (1,1), (2,2), (3,3), (5,5), (10,10)
+
+Hybrid (2 nodes):
+  • Core counts: 2, 4, 8, 16, 32, 64, 96
+  • Strides: (1,1), (2,2), (3,3), (5,5), (10,10)
+  • Distributions: 10 different MPI×OpenMP combinations for 96 cores
+
+═══════════════════════════════════════════════════════════════════════════
+
+🚀 USAGE:
+
+1. Review: QUICK_START.txt for immediate usage
+2. Details: README_SUBMISSION.md for comprehensive guide
+3. Submit: Use bash scripts to submit jobs
+
+Example:
+  $ bash submit_all_20000_tests.sh openmp
+
+═══════════════════════════════════════════════════════════════════════════
+
+✅ ALL FILES CREATED AND READY TO USE!
+
+═══════════════════════════════════════════════════════════════════════════
