@@ -1,0 +1,9 @@
+
+Lmod is automatically replacing "gcc-native/14.2" with "gcc/12.2.0".
+
+
+The following have been reloaded with a version change:
+  1) cray-libsci/25.03.0 => cray-libsci/23.09.1.1
+  2) cray-mpich/8.1.32 => cray-mpich/8.1.27
+
+slurmstepd: error: *** JOB 33312468 ON nid002792 CANCELLED AT 2025-10-15T05:33:18 DUE TO TIME LIMIT ***

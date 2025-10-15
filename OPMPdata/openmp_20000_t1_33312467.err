@@ -1,0 +1,10 @@
+
+Lmod is automatically replacing "gcc-native/14.2" with "gcc/12.2.0".
+
+
+The following have been reloaded with a version change:
+  1) cray-libsci/25.03.0 => cray-libsci/23.09.1.1
+  2) cray-mpich/8.1.32 => cray-mpich/8.1.27
+
+/var/spool/slurmd/job33312467/slurm_script: line 29: 1057424 Killed                  ./conv_stride_test -H 20000 -W 20000 -kH 200 -kW 200 -sH 1 -sW 1 -m serial
+slurmstepd: error: Detected 1 oom_kill event in StepId=33312467.batch. Some of the step tasks have been OOM Killed.

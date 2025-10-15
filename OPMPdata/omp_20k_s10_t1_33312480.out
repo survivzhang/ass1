@@ -1,0 +1,16 @@
+==========================================
+20000x20000 Matrix, Kernel 200x200, Stride (10,10) - 1 thread
+==========================================
+Job started at: Wed Oct 15 03:33:35 AM AWST 2025
+Node: nid002794
+==========================================
+[1 thread] 20000x20000 matrix, kernel 200x200, stride (10,10)
+Generating random 20000x20000 input and 200x200 kernel with stride 10x10
+Running serial mode: MPI processes=1, OpenMP threads=1
+Input size: 20000x20000, Kernel: 200x200, Stride: 10x10
+Output size: 2000x2000
+Total time: 161.013640 seconds
+
+==========================================
+Job completed at: Wed Oct 15 03:36:19 AM AWST 2025
+==========================================

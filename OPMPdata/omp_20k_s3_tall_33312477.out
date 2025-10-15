@@ -1,0 +1,81 @@
+==========================================
+20000x20000 Matrix, Kernel 200x200, Stride (3,3)
+Testing all thread counts
+==========================================
+Job started at: Wed Oct 15 03:33:36 AM AWST 2025
+Node: nid002387
+==========================================
+
+==========================================
+Testing with 2 threads
+==========================================
+[2 threads] 20000x20000 matrix, kernel 200x200, stride (3,3)
+Generating random 20000x20000 input and 200x200 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=2
+Input size: 20000x20000, Kernel: 200x200, Stride: 3x3
+Output size: 6667x6667
+Total time: 796.867573 seconds
+
+==========================================
+Testing with 4 threads
+==========================================
+[4 threads] 20000x20000 matrix, kernel 200x200, stride (3,3)
+Generating random 20000x20000 input and 200x200 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=4
+Input size: 20000x20000, Kernel: 200x200, Stride: 3x3
+Output size: 6667x6667
+Total time: 399.513664 seconds
+
+==========================================
+Testing with 8 threads
+==========================================
+[8 threads] 20000x20000 matrix, kernel 200x200, stride (3,3)
+Generating random 20000x20000 input and 200x200 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=8
+Input size: 20000x20000, Kernel: 200x200, Stride: 3x3
+Output size: 6667x6667
+Total time: 199.874019 seconds
+
+==========================================
+Testing with 16 threads
+==========================================
+[16 threads] 20000x20000 matrix, kernel 200x200, stride (3,3)
+Generating random 20000x20000 input and 200x200 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 20000x20000, Kernel: 200x200, Stride: 3x3
+Output size: 6667x6667
+Total time: 101.291348 seconds
+
+==========================================
+Testing with 32 threads
+==========================================
+[32 threads] 20000x20000 matrix, kernel 200x200, stride (3,3)
+Generating random 20000x20000 input and 200x200 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=32
+Input size: 20000x20000, Kernel: 200x200, Stride: 3x3
+Output size: 6667x6667
+Total time: 56.316136 seconds
+
+==========================================
+Testing with 64 threads
+==========================================
+[64 threads] 20000x20000 matrix, kernel 200x200, stride (3,3)
+Generating random 20000x20000 input and 200x200 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=64
+Input size: 20000x20000, Kernel: 200x200, Stride: 3x3
+Output size: 6667x6667
+Total time: 28.227244 seconds
+
+==========================================
+Testing with 96 threads
+==========================================
+[96 threads] 20000x20000 matrix, kernel 200x200, stride (3,3)
+Generating random 20000x20000 input and 200x200 kernel with stride 3x3
+Running omp mode: MPI processes=1, OpenMP threads=96
+Input size: 20000x20000, Kernel: 200x200, Stride: 3x3
+Output size: 6667x6667
+Total time: 21.403826 seconds
+
+==========================================
+Job completed at: Wed Oct 15 04:00:43 AM AWST 2025
+==========================================

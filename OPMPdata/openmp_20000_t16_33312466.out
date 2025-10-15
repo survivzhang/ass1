@@ -1,0 +1,16 @@
+==========================================
+20000x20000 Matrix, Kernel 200x200 - 16 threads
+==========================================
+Job started at: Wed Oct 15 03:33:03 AM AWST 2025
+Node: nid002816
+==========================================
+[16 threads] 20000x20000 matrix, kernel 200x200
+Generating random 20000x20000 input and 200x200 kernel with stride 1x1
+Running omp mode: MPI processes=1, OpenMP threads=16
+Input size: 20000x20000, Kernel: 200x200, Stride: 1x1
+Output size: 20000x20000
+Total time: 1006.770880 seconds
+
+==========================================
+Job completed at: Wed Oct 15 03:49:54 AM AWST 2025
+==========================================
