@@ -1,0 +1,44 @@
+==========================================
+Pure MPI Test - 4 Nodes, 96 cores
+20000x20000 Matrix, Kernel 200x200
+==========================================
+Job started at: Wed Oct 15 05:13:29 PM AWST 2025
+MPI Processes: 96
+Memory allocated: 96GB
+==========================================
+Memory usage before execution:
+Node memory:                total        used        free      shared  buff/cache   available
+Mem:           250Gi        44Gi       206Gi       478Mi       1.3Gi       206Gi
+Swap:             0B          0B          0B
+==========================================
+Starting MPI execution...
+Generating random 20000x20000 input and 200x200 kernel with stride 1x1
+Running mpi mode: MPI processes=96, OpenMP threads=1
+Input size: 20000x20000, Kernel: 200x200, Stride: 1x1
+Output size: 20000x20000
+
+========================================
+Performance Statistics
+========================================
+Total time:          178.956125 seconds (100.0%)
+Computation time:    147.504102 seconds (82.4%)
+Communication time:  31.449571 seconds (17.6%)
+  - Broadcast:       31.434414 seconds
+  - Memory copy:     0.015157 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 20000
+  - Bytes transferred: 1549.45 MB
+  - Output elements: 400000000
+========================================
+
+==========================================
+Memory usage after execution:
+Node memory:                total        used        free      shared  buff/cache   available
+Mem:           250Gi        38Gi       212Gi       479Mi       1.2Gi       212Gi
+Swap:             0B          0B          0B
+==========================================
+
+==========================================
+Job completed at: Wed Oct 15 05:16:42 PM AWST 2025
+==========================================
