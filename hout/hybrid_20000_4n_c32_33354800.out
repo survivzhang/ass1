@@ -1,0 +1,44 @@
+==========================================
+Hybrid MPI+OpenMP Test - 4 Nodes, 32 cores
+20000x20000 Matrix, Kernel 200x200
+==========================================
+Job started at: Wed Oct 15 10:42:46 PM AWST 2025
+MPI Processes: 16, OpenMP Threads: 2 (Total: 32 cores)
+Memory allocated: 96GB
+==========================================
+Memory usage before execution:
+Node memory:                total        used        free      shared  buff/cache   available
+Mem:           250Gi        17Gi       232Gi       458Mi       1.5Gi       232Gi
+Swap:             0B          0B          0B
+==========================================
+Starting hybrid execution...
+Generating random 20000x20000 input and 200x200 kernel with stride 1x1
+Running hybrid mode: MPI processes=16, OpenMP threads=2
+Input size: 20000x20000, Kernel: 200x200, Stride: 1x1
+Output size: 20000x20000
+
+========================================
+Performance Statistics
+========================================
+Total time:          464.753447 seconds (100.0%)
+Computation time:    449.852215 seconds (96.8%)
+Communication time:  14.901182 seconds (3.2%)
+  - Broadcast:       14.845401 seconds
+  - Memory copy:     0.055780 seconds
+
+Communication Statistics:
+  - MPI_Bcast calls: 20000
+  - Bytes transferred: 1628.88 MB
+  - Output elements: 400000000
+========================================
+
+==========================================
+Memory usage after execution:
+Node memory:                total        used        free      shared  buff/cache   available
+Mem:           250Gi        17Gi       232Gi       459Mi       1.5Gi       232Gi
+Swap:             0B          0B          0B
+==========================================
+
+==========================================
+Job completed at: Wed Oct 15 10:50:42 PM AWST 2025
+==========================================
