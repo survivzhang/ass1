@@ -491,7 +491,7 @@ This chart clearly illustrates the performance of various combinations of MPI pr
 
 This figure provides an in-depth analysis of the ratio between computation and communication time across different configurations, clearly elucidating the underlying causes of performance variations. The 2×48 configuration achieves optimal balance with 99.2% computation and only 0.8% communication overhead. As the number of MPI processes increases, communication overhead surges sharply from 0.8% to 15.9% in the 32×3 configuration. Within the optimized range from 4×24 to 12×8, communication overhead remains below 5.3% while computational efficiency stays above 94.7%. However, beyond 16 MPI processes, the rapid increase in communication overhead completely offsets the gains in computational efficiency, leading to a decline in overall performance.
 
-#### 6.2.5 Performance charts for Pure_MPI and Hybrid mode across different nodes 
+#### 6.2.5 Performance charts for Pure_MPI and Hybrid mode across different nodes （2 nodes VS 4 nodes)
 
 ![image-20251016145744580](image-20251016145744580.png)
 
