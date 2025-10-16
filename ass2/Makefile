@@ -2,30 +2,41 @@
 # CITS3402/CITS5507 - Assignment 2
 # Group Member: Jiazheng Guo(24070858), Zichen Zhang(24064091)
 
-# Try system mpicc first
-MPICC_CHECK := $(shell which mpicc 2>/dev/null)
-ifneq ($(MPICC_CHECK),)
-    CC = mpicc
+# Use full path to mpicc (Kaya system)
+KAYA_MPICC := /usr/mpi/gcc/openmpi-4.1.7rc1/bin/mpicc
+
+# Check if Kaya mpicc exists
+ifneq ($(wildcard $(KAYA_MPICC)),)
+    # On Kaya, use full path directly
+    CC = $(KAYA_MPICC)
     CFLAGS = -fopenmp -O3 -Wall
     LDFLAGS = -fopenmp
 else
-    # Use gcc as fallback
-    CC = gcc
-    CFLAGS = -fopenmp -O3 -Wall
-    
-    # Try pkg-config
-    MPI_PKG_INCLUDE := $(shell pkg-config --cflags mpi 2>/dev/null)
-    MPI_PKG_LIBS := $(shell pkg-config --libs mpi 2>/dev/null)
-    
-    ifneq ($(MPI_PKG_INCLUDE),)
-        CFLAGS += $(MPI_PKG_INCLUDE)
-        LDFLAGS = $(MPI_PKG_LIBS) -fopenmp
+    # Try system mpicc
+    MPICC_CHECK := $(shell which mpicc 2>/dev/null)
+    ifneq ($(MPICC_CHECK),)
+        CC = mpicc
+        CFLAGS = -fopenmp -O3 -Wall
+        LDFLAGS = -fopenmp
     else
-        # Manually add common MPI paths
-        MPI_INCLUDE := -I/usr/include/mpi -I/usr/local/include
-        MPI_LIBS := -L/usr/lib -L/usr/local/lib -lmpi
-        CFLAGS += $(MPI_INCLUDE)
-        LDFLAGS = $(MPI_LIBS) -fopenmp
+        # Use gcc as final fallback
+        CC = gcc
+        CFLAGS = -fopenmp -O3 -Wall
+        
+        # Try pkg-config
+        MPI_PKG_INCLUDE := $(shell pkg-config --cflags mpi 2>/dev/null)
+        MPI_PKG_LIBS := $(shell pkg-config --libs mpi 2>/dev/null)
+        
+        ifneq ($(MPI_PKG_INCLUDE),)
+            CFLAGS += $(MPI_PKG_INCLUDE)
+            LDFLAGS = $(MPI_PKG_LIBS) -fopenmp
+        else
+            # Manually add common MPI paths
+            MPI_INCLUDE := -I/usr/include/mpi -I/usr/local/include
+            MPI_LIBS := -L/usr/lib -L/usr/local/lib -lmpi
+            CFLAGS += $(MPI_INCLUDE)
+            LDFLAGS = $(MPI_LIBS) -fopenmp
+        endif
     endif
 endif
 
