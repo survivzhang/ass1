@@ -12,17 +12,38 @@ This project implements 2D convolution with stride support using:
 
 ## Building the Project
 
-On Kaya or Setonix:
-
+### Building the Project:
 ```bash
-# Load required modules
-module load openmpi/4.1.5
-module load gcc/12.2.0
+# Load modules first, then build
+module load gcc && module load openmpi
+make clean
+make
 
-# Build everything
+# Alternative: Use the build script
+./build.sh
+```
+
+### System-Specific Module Loading:
+```bash
+# On Setonix:
+module load gcc/12.2.0
+module load cray-mpich
+
+# On Kaya:
+module load gcc/12.4.0
+module load openmpi/5.0.5
+
+# Then build:
 make clean
 make
 ```
+
+**Note:** Module loading is **required** because:
+- The code uses `#include <mpi.h>` and `#include <omp.h>`
+- The Makefile uses `mpicc` compiler
+- **Setonix**: Uses `cray-mpich` (confirmed in error logs)
+- **Kaya**: Uses `openmpi/4.1.5` (different MPI implementation)
+- Lmod automatically manages module versions on Setonix
 
 This creates two executables:
 - `conv_test` - Assignment 1 (OpenMP only)
@@ -33,11 +54,92 @@ This creates two executables:
 ### Basic Usage
 
 ```bash
-# Run with MPI processes and OpenMP threads
-mpirun -np 4 ./conv_stride_test -H 1000 -W 1000 -kH 3 -kW 3 -sH 1 -sW 1 -m hybrid
+# Serial mode (single thread)
+./conv_stride_test -H 1000 -W 1000 -kH 3 -kW 3 -sH 1 -sW 1 -m serial
 
-# Read from files
-mpirun -np 4 ./conv_stride_test -f input.txt -g kernel.txt -sH 2 -sW 2 -o output.txt
+# OpenMP only (single MPI process, multiple threads)
+export OMP_NUM_THREADS=8
+./conv_stride_test -H 1000 -W 1000 -kH 3 -kW 3 -sH 1 -sW 1 -m omp
+
+# MPI only (multiple processes, single thread each)
+mpirun -np 4 ./conv_stride_test -H 1000 -W 1000 -kH 3 -kW 3 -sH 1 -sW 1 -m mpi
+
+# Hybrid MPI+OpenMP (you control the distribution)
+export OMP_NUM_THREADS=4
+mpirun -np 4 ./conv_stride_test -H 1000 -W 1000 -kH 3 -kW 3 -sH 1 -sW 1 -m hybrid
+```
+
+### Hybrid MPI×OpenMP Distribution Examples
+
+**Key Point:** You control the distribution by setting:
+- `mpirun -np N` → Number of MPI processes
+- `export OMP_NUM_THREADS=M` → Number of OpenMP threads per process
+- **Total cores = N × M**
+
+```bash
+# Example 1: 2×16 distribution (2 MPI processes × 16 OpenMP threads = 32 cores)
+export OMP_NUM_THREADS=16
+mpirun -np 2 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+
+# Example 2: 8×4 distribution (8 MPI processes × 4 OpenMP threads = 32 cores)
+export OMP_NUM_THREADS=4
+mpirun -np 8 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+
+# Example 3: 16×2 distribution (16 MPI processes × 2 OpenMP threads = 32 cores)
+export OMP_NUM_THREADS=2
+mpirun -np 16 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+
+# Example 4: 32×1 distribution (32 MPI processes × 1 OpenMP thread = 32 cores)
+export OMP_NUM_THREADS=1
+mpirun -np 32 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+```
+
+### File I/O Examples
+
+```bash
+# Read from files and save output
+mpirun -np 4 ./conv_stride_test -f input.txt -g kernel.txt -sH 2 -sW 2 -o output.txt -m hybrid
+
+# Generate random data and save to files
+mpirun -np 4 ./conv_stride_test -H 1000 -W 1000 -kH 5 -kW 5 -sH 1 -sW 1 -f my_input.txt -g my_kernel.txt -m hybrid
+```
+
+### SLURM Usage Examples
+
+```bash
+# Submit a SLURM job with specific MPI×OpenMP distribution
+sbatch -J my_job \
+  --nodes=2 \
+  --ntasks=8 \
+  --cpus-per-task=4 \
+  --time=01:00:00 \
+  --wrap="export OMP_NUM_THREADS=4; srun -n 8 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid"
+
+# Interactive SLURM session
+salloc --nodes=2 --ntasks=8 --cpus-per-task=4 --time=01:00:00
+export OMP_NUM_THREADS=4
+srun -n 8 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+```
+
+### Performance Testing Examples
+
+```bash
+# Test different distributions with same total cores (32)
+echo "Testing 2×16 distribution:"
+export OMP_NUM_THREADS=16
+mpirun -np 2 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+
+echo "Testing 4×8 distribution:"
+export OMP_NUM_THREADS=8
+mpirun -np 4 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+
+echo "Testing 8×4 distribution:"
+export OMP_NUM_THREADS=4
+mpirun -np 8 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+
+echo "Testing 16×2 distribution:"
+export OMP_NUM_THREADS=2
+mpirun -np 16 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
 ```
 
 ### Command Line Options
@@ -172,9 +274,14 @@ mpirun -np 4 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 3 -sW 3 -m hybri
 ## Troubleshooting
 
 - **Build fails**: Check modules are loaded (`module list`)
-- **MPI not found**: Load OpenMPI module
+- **MPI not found**: 
+  - **Setonix**: Load `cray-mpich` module
+  - **Kaya**: Load `openmpi/4.1.5` module
 - **Wrong results**: Verify stride parameters match test case directory name
 - **Slow performance**: Adjust process/thread ratio, check node allocation
+- **Module errors**: 
+  - **Setonix**: Has `cray-mpich` and `gcc/12.2.0` available (Lmod manages versions automatically)
+  - **Kaya**: Has `openmpi/4.1.5` and `gcc/12.2.0` available
 
 ## Report Analysis Points
 
@@ -185,6 +292,37 @@ mpirun -np 4 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 3 -sW 3 -m hybri
 5. **Scalability**: Strong scaling, weak scaling analysis
 6. **Cache Effects**: Memory layout, access patterns
 7. **Load Balancing**: Work distribution across processes
+
+## Quick Reference
+
+### Common Commands
+
+```bash
+# Build
+module load gcc && module load openmpi
+make clean && make
+
+# Test all modes
+./conv_stride_test -H 100 -W 100 -kH 3 -kW 3 -sH 1 -sW 1 -m serial
+export OMP_NUM_THREADS=4; ./conv_stride_test -H 100 -W 100 -kH 3 -kW 3 -sH 1 -sW 1 -m omp
+mpirun -np 2 ./conv_stride_test -H 100 -W 100 -kH 3 -kW 3 -sH 1 -sW 1 -m mpi
+export OMP_NUM_THREADS=2; mpirun -np 2 ./conv_stride_test -H 100 -W 100 -kH 3 -kW 3 -sH 1 -sW 1 -m hybrid
+
+# Performance test (32 cores total)
+export OMP_NUM_THREADS=16; mpirun -np 2 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+export OMP_NUM_THREADS=8; mpirun -np 4 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+export OMP_NUM_THREADS=4; mpirun -np 8 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+export OMP_NUM_THREADS=2; mpirun -np 16 ./conv_stride_test -H 2000 -W 2000 -kH 5 -kW 5 -sH 1 -sW 1 -m hybrid
+```
+
+### Key Points
+
+- **`-m hybrid`** uses both MPI and OpenMP, but **you control the distribution**
+- **`mpirun -np N`** sets number of MPI processes
+- **`export OMP_NUM_THREADS=M`** sets OpenMP threads per process
+- **Total cores = N × M**
+- **Test different distributions** to find optimal performance
+- **SLURM scripts** automate testing of multiple configurations
 
 ## Contact
 
