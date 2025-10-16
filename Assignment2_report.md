@@ -3,7 +3,7 @@
 # Assignment 2: 2D Convolution with MPI and OpenMP Hybrid Parallelism
 
 **Authors:** Jiazheng Guo(24070858),Zichen Zhang(24064091)
-**Due:** Friday, 10th October 2025
+**Due:** Friday, 17th October 2025
 
 <div style="page-break-after: always;"></div>
 
@@ -353,119 +353,152 @@ In the `performance_analysis_threads` function within the `conv2d.c` file, we us
 
 ​       • Warm-up runs: The code performs an untimed “warm-up” run before the timed loop. This crucial step ensures the program code and relevant data (such as input matrices and convolution kernels) are loaded into the CPU cache. Consequently, the actual timed run avoids “cold start” effects (e.g., data loading from main memory), yielding more accurate and repeatable performance data.
 
+#### 6.1.3 Communication time analysis
+
+##### 6.1.3.1 Memory Copy Time
+
+This portion of time is spent preparing the local input data (**Halo**) required for each MPI process.
+
+​         . Logic: Each process first determines the input row range (`input_start` to `input_end`) to extract from the global input matrix f, based on its assigned output row range (`local_start` to `local_end`) and the convolution kernel size (`kH`, `kW`). This range encompasses all data required for computing the local output, including overlapping halo regions.
+
+​         . Measurement Point: When `size > 1` (i.e., during multi-process execution), the code allocates a `local_f` buffer and copies the required input rows from the global `f` to the local `local_f` using `memcpy`.
+
+```
+t_comm_start = MPI_Wtime();
+// ... allocate local_f
+for (int i = 0; i < input_rows; i++) {
+    memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+}
+stats->memory_copy_time += MPI_Wtime() - t_comm_start;
+```
+
+Meaning: In a distributed memory environment, this memory replication represents the overhead incurred by a process preparing local data. Although it occurs within the process itself, it is fundamentally part of communication work, as it involves transforming global (or initial) data into locally computable data.
+
+##### 6.1.3.2 Broadcast Time
+
+This portion of time represents the overhead incurred to synchronize and share computation results among all MPI processes.
+
+​        . Logic: After all processes complete the computation of their local output rows, the code employs a series of MPI_Bcast operations to ensure each process possesses the complete final result. Each process takes turns acting as the root process, broadcasting its computed local output rows to all other processes.
+
+```
+t_comm_start = MPI_Wtime();
+for (int p = 0; p < size; p++) {
+    // ... determine p_rows
+    for (int i = 0; i < p_rows; i++) {
+        MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
+        stats->num_communications++;
+        stats->bytes_communicated += (long long)out_W * sizeof(float);
+    }
+}
+stats->broadcast_time = MPI_Wtime() - t_comm_start;
+```
+
+Meaning: `MPI_Bcast` is a standard MPI collective communication operation, representing the most direct communication overhead in distributed parallel computing.
+
 ### 6.2 Figures and charts:
 
 #### 6.2.1 Overall Performance Comparison and Scalability Analysis Chart
 
 ##### 6.2.1.1 Figure 1
 
-![image-20251009123812272](image-20251009123812272.png)
+![image-20251015182614196](image-20251015182614196.png)
 
-In strongly scalable tests with fixed input matrices（10000x10000) and kernels(3x3), the trend changes in total runtime, speedup, and efficiency across OpenMP, pure MPI, and Hybrid programming models as the number of cores increases from 1 to 96 clearly reveal the inherent bottlenecks of different parallel models:
+The two figures above illustrate the trend in total runtime as the number of cores(2,4,8,16,32,64,96) increases, using fixed input matrices of 1000x1000 and 10000x10000 with a 3x3 kernel,1x1 stride,2 nodes.
 
-At 1 core, all three approaches exhibit runtime close to baseline levels, indicating minimal serial sections and initialization overhead. As cores scale to 16, OpenMP shows a slight decline or near-linear decrease, benefiting from efficient intra-node thread parallelism startup. Pure MPI also decreases with core count, as each MPI process handles relatively independent workloads. Hybrid mode performs similarly to or slightly better than pure MPI at low core counts, reflecting the locality advantages of intra-node thread shared memory.
+As the number of cores increases, the growth rate of communication overhead exceeds the reduction in computational time, resulting in an overall increase in total runtime. This occurs for the following reasons:
 
-However, performance bottlenecks emerge at 32 cores: OpenMP execution times show significant increases (e.g., from 1.x to 2.x orders of magnitude), indicating parallel overhead begins to dominate computational gains. Pure MPI may also show reduced acceleration or slight time increases, attributed to growing communication volume and network contention. In contrast, the Hybrid model maintains relatively stable or modest performance gains due to fewer inter-process messages and efficient utilization of local shared memory. 
+1. Communication and synchronisation overhead become dominant: MPI communication costs are prohibitively high. Increasing the number of MPI processes disproportionately amplifies inter-process communication and synchronisation overhead. Given the small problem scale, each process receives a minimal computational task (i.e., output rows). Nevertheless, each process must still execute fixed communication steps, such as copying halo data (memcpy) and collecting results (iterative `MPI_Bcast`). When computational time decreases substantially, the fixed communication latency becomes the bottleneck, and the total runtime is instead dominated by these non-computational overheads.
+2. OpenMP thread management overhead: Even in pure OpenMP mode, excessive thread creation, destruction, and barrier synchronisation costs (at the end of `#pragma omp parallel for`), coupled with contention for shared caches between threads, can outweigh computational gains when thread counts are excessive. 
+3.  Excessively Fine-Grained Tasks: The total computational load may be insufficient to offset the setup costs required for large-scale parallelisation. When tasks are divided among too many cores, the granularity per core becomes excessively fine. This results in the additional time required to initiate parallelisation exceeding the time saved through parallel computation, leading to an overall increase in runtime.
 
-Performance differences are amplified on high-core-count systems with 64 and 96 cores. OpenMP's runtime increases substantially, reaching the highest point in the charts, indicating the program encounters severe resource contention—particularly typical bottlenecks in shared-memory environments such as memory bandwidth saturation, cache coherence traffic, frequent thread synchronization, and false sharing. While pure MPI's runtime also increases with growing communication overhead, it generally remains lower than OpenMP's. Ultimately, the Hybrid mode exhibits the smallest growth rate and consistently remains the fastest implementation. This advantage stems from its use of OpenMP to reduce the number of expensive cross-node MPI messages. By employing a small amount of MPI combined with multithreading per node, it minimizes cross-node communication and enhances local cache reuse. Consequently, it achieves the lowest runtime at high core counts, effectively increasing the computational granularity per MPI process. This approach delivers optimal scalability and the highest efficiency in multi-core/multi-node environments.
+<img src="image-20251015182629974.png" alt="image-20251015182629974" style="zoom: 80%;" />
+
+The figure above illustrate the trend in total runtime as the number of cores(2,4,8,16,32,64,96) increases, using fixed input matrices of 20000x20000 with a 200x200 kernel,1x1 stride,2 nodes.
+
+This chart powerfully demonstrates the exceptional scalability of parallel convolution implementations—including pure OpenMP, pure MPI, and MPI+OpenMP hybrid modes—when handling computationally intensive, large-scale inputs. Runtime plummets from approximately 14,810 seconds on a single core to roughly 186 seconds across 96 cores, exhibiting near-linear acceleration. Computational intensity dominates, with communication overhead effectively masked.
+
+1. High computational intensity and acceleration effect: The 20000x20000 input matrix and 200x200 kernel matrix generate an enormous computational workload (FLOPs). The substantial computational gains fully offset the communication, synchronisation, and management overhead introduced by parallelisation, thereby achieving the efficient acceleration sought in high-performance computing.
+2. Low Communication/Computational Ratio: Given the substantial computational task granularity assigned to each core, the growth in communication volume (Halo Exchange) and synchronisation frequency (MPI_Bcast loops) required for boundary data exchange and result collection remains minimal relative to the total computational load.
+3. Pattern Performance Convergence: The OpenMP, Hybrid, and Pure_MPI curves remain remarkably close across the entire test range (from 1 to 100 cores). This indicates that in this compute-bound scenario, computational time constitutes the primary bottleneck, rendering communication overhead—whether synchronisation in shared memory or MPI messaging in distributed memory—negligible. This validates that the row-blocking and loop-parallelisation strategy adopted for tackling large-scale problems is both efficient and correct.
 
 ##### 6.2.1.2 Figure 2
 
-![image-20251009125055025](image-20251009125055025.png)
+![image-20251015182905379](image-20251015182905379.png)
 
-The parallel efficiency plot visually measures resource utilization per core for effective computation as the number of cores increases. Starting from the baseline efficiency E = 1 at 1 core, the efficiency curve gradually declines as parallel overhead increases. However, the rate of decline reveals inherent bottlenecks in different programming models:
+The figure above illustrates that parallel overhead dominates, with insufficient computational gains leading to failed acceleration. Whether for 1000x1000 or 10000x10000 inputs (right-hand figure, where despite a 100-fold increase in scale, the 3x3 core configuration still yields low overall computation), the total computational intensity remains insufficient to offset the fixed overhead introduced by parallelisation. The acceleration ratios for OpenMP, Pure_MPI, and Hybrid remain at extremely low levels across nearly the entire curve, levelling off rapidly. This indicates that for problems of relatively low computational intensity, increasing the number of cores only disproportionately amplifies the overhead of communication, synchronisation, and thread management. Communication latency and startup costs become the primary bottlenecks, preventing effective acceleration ratios from being realised.
 
-Within the low-core range of 2 to 8 cores, all models exhibit only a slight efficiency decline, typically maintaining values between 0.8 and 1.0. This indicates highly effective parallelization, where communication and synchronization overhead remain negligible. However, efficiency begins to decline further as the core count increases to 16. Leveraging distributed memory and hierarchical optimization advantages, Pure MPI and Hybrid models still maintain relatively high efficiency within the 0.6 to 0.9 range.
+<img src="image-20251015182842855.png" alt="image-20251015182842855" style="zoom:80%;" />
 
-When the core count reaches 32 or higher, the efficiency trends of the three models diverge significantly:
+ The input of 20000 x 20000 combined with the large kernel of 200 x 200 generated an exceptionally massive computational workload (with computational intensity increasing tens of thousands of times compared to Figure 1). The substantial computational gains were sufficient to fully offset all communication and synchronisation overhead introduced by parallelisation. Consequently, all three parallelisation approaches achieved significant and near-linear speedup.
 
-1. OpenMP efficiency plummets to extremely low levels (e.g., 0.4, 0.2, or even lower), demonstrating that shared memory resource contention on a single node becomes the primary bottleneck under massive thread concurrency. Memory bandwidth saturation, cache coherence traffic, and frequent thread synchronization overhead rapidly consume the computational gains from additional cores, leaving most cores idle or engaged in futile contention.
-
-2. While Pure MPI efficiency declines, it remains more stable than OpenMP (e.g., between 0.35 and 0.4). This indicates that although inter-process communication overhead increases with core count, it avoids the extreme memory contention inherent in OpenMP's shared-memory model.
-
-3. The Hybrid model exhibits the smallest and most stable efficiency decline (e.g., maintaining around 0.65), achieving the highest efficiency among all models. This strongly demonstrates the superiority of the Hybrid strategy: by using OpenMP to reduce expensive intra-node MPI communication and leveraging MPI for necessary inter-node communication, it successfully maintains a balance between computational and communication overhead at large core counts, achieving higher resource utilization and scalability.
+In computationally intensive scenarios such as20000 x 20000, the performance of pure MPI mode is marginally lower due to its inherent high communication latency (though computationally intensive, latency still persists). The Hybrid mode successfully balances computational and communication overhead by employing OpenMP for efficient intra-node computation while minimising inter-node communication through fewer MPI processes. This equilibrium enables the Hybrid mode to utilise all  cores more effectively, thereby achieving performance closer to the ideal speedup ratio.
 
 ##### 6.2.1.3 Figure 3
 
-![image-20251009125108651](image-20251009125108651.png)
+![image-20251015183021368](image-20251015183021368.png)
 
-The speedup plot serves as a key metric for evaluating performance gains in parallel programs, comparing actual performance against sequential performance. The chart trend indicates that as the number of cores increases, the performance differences and bottlenecks among the three models become progressively amplified.
+These two figures illustrate the efficiency changes for the aforementioned 1000x1000 and 10000x10000 configurations. They demonstrate that parallelization overhead (communication, synchronization, thread management) consumes the vast majority of runtime. Since each core receives an extremely small computational workload, the fixed overhead of parallel initialization and the latency of each communication synchronization cannot be effectively offset by the computational work. Consequently, adding each additional core yields computational gains far outweighed by the introduced system overhead, resulting in extremely low resource utilization. This algorithm is unsuitable for large-scale parallelization at this scale.
 
-During the initial parallelization phase from 1 to 8 cores, the speedup curves for all models exhibit near-linear growth (from 1x to approximately 2x to 6x), strongly demonstrating the significant gains achieved by parallelization strategies at lower core counts. When core counts reach 16 cores, the acceleration ratio curve begins to deviate from the ideal y=x straight line. However, all implementations still achieve substantial acceleration, typically within the 10x to 20x range.
+<img src="image-20251015182942453.png" alt="image-20251015182942453" style="zoom:80%;" />
 
-Nevertheless, at high core counts of 32 cores and above, decisive performance divergence emerges:
+This figure represents the efficiency of a 20000x20000 input matrix and a 200x200 kernel. It shows that despite the increase in core count, efficiency $(E)$ remains at a high level (e.g., 70%–85%) with a relatively gradual decline. This indicates that the massive computational workload effectively masks the parallel overhead. The high computational intensity ensures that computation time remains the dominant factor, with system overhead accounting for a negligible proportion. The algorithm maintains high granularity and excellent load balancing even as the number of cores increases. Consequently, it demonstrates outstanding parallel scalability, making it highly suitable for operation in large-scale HPC environments featuring multi-core processors and multiple nodes.
 
-1. The OpenMP speedup curve rapidly plateaus or even declines (i.e., negative speedup), indicating that excessive threading in OpenMP causes parallel overhead (e.g., memory contention, synchronization latency) to outweigh the benefits of reduced computation time. Particularly at 64 and 96 cores, OpenMP performance can become severely degraded.
-
-2. The acceleration ratio curve for Pure MPI performs well at medium scales (benefiting from independent work per process), but begins to slow significantly at larger scales. This is primarily because increased process counts lead to higher communication frequency and data transfer volumes, making high-latency MPI communication the primary bottleneck limiting acceleration.
-
-3. The acceleration ratio curve for the Hybrid model continues to grow and comes closest to the ideal acceleration ratio across all implementations. Particularly in the largest-scale tests with 64 and 96 cores, Hybrid's acceleration performance significantly outperforms the other two models. This demonstrates that Hybrid mode successfully balances computational task granularity and communication overhead by cleverly combining OpenMP (addressing intra-node shared memory parallelism) and MPI (addressing inter-node distributed communication), enabling optimal performance on highly scalable resources.
+Hybrid achieves peak efficiency by striking the optimal balance between communication overhead and thread contention. It leverages MPI's cross-node capabilities to attain higher speedup than OpenMP, while utilizing OpenMP's low-latency shared memory to achieve greater efficiency than Pure_MPI. This represents the optimal strategy for running massively parallel programs on HPC clusters.
 
 #### 6.2.2 Communication/Computational Overhead Analysis Chart
 
-![image-20251009125359233](image-20251009125359233.png)
+##### 6.2.2.1 Figure 1
 
-1. **Pure MPI Algorithms**: Communication Overhead Dominates Everything (The Communication Wall)
+![image-20251015164605783](image-20251015164605783.png)
 
-In a pure MPI model within a distributed multi-node environment, as the number of cores increases, the percentage of communication time rises sharply, eventually becoming dominant (potentially exceeding 90%), while the percentage of computation time rapidly declines to an extremely low level. This trend arises from:
+The figure above shows the proportion of computation time versus communication time for hybrid and pure MPI implementations across different input matrices (1000x1000, 10000x10000) and 3x3 cores at varying core counts. It is evident that communication time significantly outweighs computation time in both scenarios. This explains why the total runtime, acceleration ratio, and efficiency variations did not achieve optimal results under these conditions.
 
-Granularity of Computational Tasks versus Rigid Communication Overhead: In strongly scalable tests with fixed problem sizes, increasing the number of processes p reduces each process's computational workload by a factor of 1/p (i.e., computational time decreases). However, the absolute value of communication overhead required for parallelisation—particularly high-latency cross-node messaging, communication initiation delays, and synchronisation wait times—decreases far more slowly than computational time.
+##### 6.2.2.2 Figure 2
 
-Communication-to-computation imbalance: When the number of processes p is large, the computational time per process becomes negligible, yet the communication and synchronisation time each process must bear remains significant. This amplifies the proportion of communication time in the total runtime, indicating that the pure MPI model suffers from severe **communication wall** constraints. Substantial core time is wasted waiting for data and synchronisation, resulting in extremely low parallel efficiency.
+![image-20251015170333640](image-20251015170333640.png)
 
-2. **MPI+OpenMP Hybrid Algorithms**: Effectively Controlling Communication Overhead (Hierarchical Optimisation)
-
-The hybrid model aims to significantly reduce the growth rate of the communication time percentage through a hierarchical parallelisation strategy, while maintaining a substantially higher computational time percentage than pure MPI at high core counts. This favourable trend stems from its effective management of parallelisation overhead:
-
-Reducing message volume via shared memory: The Hybrid model employs low-overhead shared-memory parallelism using OpenMP threads within each node, reserving MPI processes solely for essential inter-node communication. This substantially decreases the volume and frequency of costly MPI messages. Many inter-process communications that would otherwise require high-latency networking in pure MPI are transformed into low-overhead shared-memory accesses and thread synchronisation.
-
-Maintaining Computational Granularity and Concealing Latency: Due to the reduced number of MPI processes employed by the Hybrid model, each MPI process handles relatively coarse-grained computational tasks. This yields a healthier ratio of computation time to communication latency, effectively masking portions of network communication wait times and thereby enhancing core utilisation efficiency.
-
-Consequently, the healthy trend of the Hybrid curve in the charts demonstrates the success of its layered strategy: by optimising communication methods in multi-core/multi-node environments, it successfully allocates a greater proportion of total time to effective computational work, significantly enhancing the programme's scalability under massively parallel conditions.
+The figure above shows the proportion of computation time versus communication time for hybrid and pure MPI implementations on different input matrices (20000x20000) and 3x3 cores across varying core counts. It is evident that in both scenarios, computation time significantly outweighs communication time. This indicates that for large-scale matrices under these conditions, the total runtime, acceleration ratio, and efficiency variations have reached an ideal state.
 
 #### 6.2.3 Stride Influence Analysis Chart
 
 ##### 6.2.3.1 Figure 1
 
-#### ![image-20251009125829466](image-20251009125829466.png)
+<img src="image-20251016152522988.png" alt="image-20251016152522988" style="zoom: 67%;" />
 
-1. **OpenMP Trend Analysis**: Computational Advantages Constrained by Fixed Overhead
+The figure above shows the variation in total runtime for hybrid, pure MPI, and OpenMP implementations using the same input matrix (10000x10000) and a 3x3 core configuration across 2 nodes at different stride lengths. It demonstrates that as the stride increases, the total runtime decreases significantly.
 
-Expected Trend: The OpenMP curve will decline rapidly, but once Stride reaches a certain scale, the curve will plateau at a fixed low level.
-
-Computational Bottleneck Mitigation: Stride drastically reduces computational load, effectively resolving the memory bandwidth constraints and computational latency issues OpenMP faces at Stride 1×1. This enables rapid performance gains during early stride increases (with substantial runtime reductions).
-
-Fixed Parallel Overhead Limits Performance: Stride cannot eliminate or reduce OpenMP's fixed parallel overhead, such as thread creation/destruction, lock contention, and cache coherence costs arising from NUMA architectures. When Stride is large, computational time (effective work) becomes extremely short. The program's total runtime is then dominated by these computation-independent parallel overheads, causing the curve to plateau and prevent further decline.
-
-2. **Pure MPI Trend Analysis**: Communication Bottlenecks Effectively Mitigated
-
-Expected Trend: The Pure MPI curve should show a significant decline, with the most pronounced performance improvement relative to Stride 1×1 likely occurring at high Stride scales.
-
-Significant Communication Efficiency Gains: The core bottleneck of Pure MPI is high-latency inter-node communication. Increasing the stride directly reduces both the total amount of boundary data each process needs to send and receive, and the total data volume for final result aggregation.
-
-Reduced Communication-to-Computation Ratio: The decrease in communication data volume effectively lowers the proportion of communication overhead in total runtime, alleviating the **“communication wall”** issue Pure MPI faces at Stride 1×1. This allows the Pure MPI model to approach its theoretical computational performance more closely, resulting in a pronounced curve decline.
-
-3. **Hybrid (MPI+OpenMP) Trend Analysis**: Consistently Optimal with Best Balance
-
-Expected Trend: The Hybrid curve should maintain the lowest total runtime across all stride scales, with a potentially flatter decline curve than other models.
-
-Initial Advantage: The Hybrid model already optimizes intra-node communication overhead via OpenMP at Stride 1×1, resulting in a baseline runtime inherently lower than Pure MPI.
-
-Optimal Balance Point: Increasing stride further reduces inter-node MPI communication volume. Since Hybrid consistently maintains the optimal balance between communication and computation (using OpenMP for low-overhead tasks and MPI for necessary high-overhead tasks), it demonstrates the highest efficiency across tasks of varying granularity. Consequently, its curve consistently resides at the bottom of the chart, proving its superior performance across different algorithmic granularity variations.
-
-This chart powerfully demonstrates Stride's effectiveness while highlighting how the Hybrid programming model achieves peak performance and scalability at any task granularity through layered optimization.
+This demonstrates that Hybrid mode performs best in computationally intensive scenarios (small strides) due to its load balancing advantages. For instance, at stride (2,2), it took 1.244 seconds—significantly outperforming OpenMP's 1.387 seconds. However, as computational intensity decreases with increasing stride, OpenMP gradually gains an advantage by avoiding cross-node communication overhead. At stride (10,10), it completes in just 0.047 seconds—approximately 66% faster than Hybrid's 0.139 seconds. Pure MPI consistently lags due to communication overhead. This trend demonstrates that the optimal parallelization strategy must be dynamically selected based on specific computational intensity.
 
 ##### 6.2.3.2 Figure 2
 
 ![image-20251009125741666](image-20251009125741666.png)
 
-This image analysis compares the **Hybrid** model and the **Pure MPI (Pure MPI)** models under different **Stride** settings. Analysis reveals that the **Hybrid model significantly outperforms the Pure MPI model**. For the **Hybrid model**, **computation** consistently dominates (73%–81%), with communication overhead being relatively minor (19%–27%). The communication proportion increases slightly as stride lengthens. In contrast, the **Pure MPI model** treats **communication** as the primary bottleneck, with communication accounting for as much as(61%-71%) of the total time, while effective computation time only constitutes (28%-39%). More critically, as the stride increases from (2, 2) to (10, 10), the communication overhead share in the Pure MPI model increases significantly while computational efficiency declines markedly. This strongly demonstrates that **the Hybrid model (typically MPI + threads) can more effectively utilize computational resources** for such convolution tasks by reducing expensive cross-node communication.
+This image analysis compares the Hybrid and the Pure MPI  under different Stride settings(same input matrix and kernel,2 nodes). Analysis reveals that the Hybrid model significantly outperforms the Pure MPI model. For the Hybrid model, computation time consistently dominates (73%–81%), with communication overhead being relatively minor (19%–27%). The communication time proportion increases slightly as stride lengthens. In contrast, the Pure MPI model treats communication as the primary bottleneck, with communication time accounting for as much as(61%-71%) of the total time, while effective computation time only constitutes (28%-39%). More critically, as the stride increases from (2, 2) to (10, 10), the communication overhead share in the Pure MPI model increases significantly while computational efficiency declines markedly. This strongly demonstrates that the Hybrid model can more effectively utilize computational resources for such convolution tasks by reducing expensive cross-node communication.
 
 ---
 
+#### 6.2.4 Optimal Configuration Analysis Chart for Hybrid Parallel Systems(2 nodes)
+
+##### 6.2.4.1 Figure 1
+
+<img src="image-20251015171337261.png" alt="image-20251015171337261" style="zoom: 67%;" />
+
+This chart clearly illustrates the performance of various combinations of MPI processes and OpenMP threads across 96 compute cores. Results show that the 2×48 configuration achieved the shortest total runtime of 170.39 seconds, ranking first with an 11.1% improvement over the pure OpenMP approach (191.56 seconds). The optimal performance range is concentrated between the 2×48 and 12×8 configurations, with a total time difference of only 2.6%. This indicates that a moderate number of MPI processes (2–12) can effectively leverage the advantages of hybrid parallelism. However, when the number of MPI processes increases further to 32×3 and 48×2, performance deteriorates significantly to 183.72 seconds, demonstrating that excessive processes introduce severe performance overhead.
+
+##### 6.2.4.2 Figure 2
+
+<img src="image-20251015171404594.png" alt="image-20251015171404594" style="zoom:67%;" />
+
+This figure provides an in-depth analysis of the ratio between computation and communication time across different configurations, clearly elucidating the underlying causes of performance variations. The 2×48 configuration achieves optimal balance with 99.2% computation and only 0.8% communication overhead. As the number of MPI processes increases, communication overhead surges sharply from 0.8% to 15.9% in the 32×3 configuration. Within the optimized range from 4×24 to 12×8, communication overhead remains below 5.3% while computational efficiency stays above 94.7%. However, beyond 16 MPI processes, the rapid increase in communication overhead completely offsets the gains in computational efficiency, leading to a decline in overall performance.
+
+#### 6.2.5 Performance charts for Pure_MPI and Hybrid mode across different nodes 
+
+![image-20251016145744580](image-20251016145744580.png)
+
+This chart compares the scalability performance of Pure MPI and Hybrid mode across 2-node and 4-node environments. Overall, both parallel modes demonstrate strong scalability, with performance increasing nearly linearly as the number of cores grows. Hybrid mode slightly outperforms Pure MPI in most configurations, particularly within the medium core range (32-64 cores). At the maximum scale (96 cores), their performance converges, indicating that the hybrid parallel mode more effectively balances computational and communication overhead, yielding sustained performance advantages in multi-node scaling.
+
+At identical core counts, the 4-node configuration consistently demonstrates superior performance compared to the 2-node setup. Specifically, at 96 cores, the 4-node Hybrid mode completed in 183.06 seconds, 0.4% faster than the 2-node's 183.72 seconds. At 64 cores, the difference was more pronounced: the 4-node Pure MPI achieved 262.01 seconds, outperforming the 2-node's 269.13 seconds. This advantage primarily stems from the 4-node architecture's superior ability to distribute communication load and reduce resource contention within individual nodes. Performance gains are most pronounced in the mid-range core count (32-64 cores), where the 4-node Hybrid configuration outperformed the 2-node setup by 4.1% at 32 cores. However, as core counts increase further, cross-node communication overhead begins to dominate performance, causing the two node configurations to converge in performance at the highest core counts.
+
 ## 7. Conclusion
 
-Summarise the implementation achievements of this project, including the successful support for Stride parameters and the realisation of hybrid parallelism. Reiterate the highest acceleration ratio attained on HPC resources and the corresponding optimal **hybrid (P,T)** configuration. Finally, evaluate the effectiveness of the hybrid parallel model in addressing such data-intensive computational tasks.
-
-## 8. Appendix
-
+This experiment systematically validated the significant advantages of the MPI+OpenMP hybrid parallelism model in large-scale two-dimensional convolution computations through comprehensive performance testing and analysis. Experimental results demonstrate that in computationally intensive scenarios (e.g., 20000×20000 matrix with 200×200 convolution kernel), the 2×48 hybrid configuration achieved optimal performance with a minimum runtime of 170.39 seconds—representing an 11.1% improvement over pure OpenMP. This advantage stems from effectively balancing computational load and communication overhead through an optimal number of MPI processes (2–12). As problem scale varies, the optimal parallelization strategy requires dynamic adjustment—hybrid parallelism suits computationally intensive tasks, while pure OpenMP is more suitable for computationally light tasks. Additionally, the 4-node architecture demonstrates superior scalability within the medium core range through better communication load distribution.
