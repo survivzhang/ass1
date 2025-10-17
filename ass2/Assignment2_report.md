@@ -171,6 +171,128 @@ void conv2d_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, i
 
 Combines MPI's distributed memory (inter-process communication) with OpenMP's shared memory (inter-thread parallelism). MPI handles the coarse-grained parallelisation by allocating output rows to processes. Within each MPI process, OpenMP employs parallel for loops (as seen in `conv2d_omp_stride`) to parallelise the locally computed output rows, achieving fine-grained parallelism. Result collection similarly utilises `MPI_Bcast`.
 
+### 2.5 Memory Layout and Cache Optimization
+
+#### 2.5.1 Row-Major Memory Layout
+
+Our implementation uses row-major memory layout (array[row][col]), which provides several performance advantages:
+
+- **Spatial locality**: Consecutive memory access in the innermost loops ensures that when we access `f[input_i][input_j]`, the next elements in the same row are likely to be in the same cache line
+- **Cache line utilization**: Better utilization of CPU cache lines (typically 64 bytes) by accessing consecutive memory locations
+- **Prefetching benefits**: Hardware prefetchers can predict and prefetch subsequent memory locations based on sequential access patterns
+
+```
+Memory Layout: Row-Major Order
+f[0][0] f[0][1] f[0][2] ... f[0][W-1]  ← Row 0 (consecutive in memory)
+f[1][0] f[1][1] f[1][2] ... f[1][W-1]  ← Row 1 (consecutive in memory)
+...
+f[H-1][0] f[H-1][1] ... f[H-1][W-1]   ← Row H-1 (consecutive in memory)
+```
+
+#### 2.5.2 Access Pattern Optimization
+
+The nested loop structure is carefully designed for cache efficiency:
+
+```c
+for (int i = 0; i < H; i++) {           // Row-wise iteration (outer)
+    for (int j = 0; j < W; j++) {       // Column-wise iteration (inner)
+        for (int ki = 0; ki < kH; ki++) {    // Kernel row
+            for (int kj = 0; kj < kW; kj++) { // Kernel column (innermost)
+                // Access f[input_i][input_j] - row-major access
+                sum += f[input_i][input_j] * g[ki][kj];
+```
+
+**Cache-Friendly Design Principles:**
+1. **Innermost loop accesses consecutive memory**: The `kj` loop accesses `f[input_i][input_j]` where `input_j` varies most frequently
+2. **Kernel reuse**: The kernel `g[ki][kj]` is accessed repeatedly and typically fits entirely in L1 cache
+3. **Output locality**: Writing to `output[i][j]` maintains spatial locality
+
+#### 2.5.3 Block Size Optimization for Cache
+
+The `conv2d_omp_blocked()` function implements adaptive block sizing based on cache hierarchy:
+
+```c
+// Calculate optimal block size based on matrix dimensions, kernel size, and thread count
+int num_threads = omp_get_max_threads();
+int kernel_ops = kH * kW;  // Operations per output pixel
+int block_size;
+
+// Base block size based on matrix dimensions
+if (H < 100) {
+    block_size = 8;        // Fits in L1 cache (32KB)
+} else if (H < 500) {
+    block_size = 16;       // Fits in L2 cache (256KB)
+} else if (H < 2000) {
+    block_size = 32;       // Fits in L3 cache (8MB)
+} else {
+    block_size = 64;       // Large working set optimization
+}
+```
+
+**Cache Hierarchy Considerations:**
+- **L1 Cache (32KB)**: Small matrices and kernels fit entirely
+- **L2 Cache (256KB)**: Medium-sized blocks with good hit rates
+- **L3 Cache (8MB)**: Large blocks for big matrices
+- **Memory bandwidth**: Block sizes chosen to maximize memory bandwidth utilization
+
+#### 2.5.4 MPI Process Memory Management
+
+Within each MPI process, we implement several memory optimizations to minimize cache misses and memory bandwidth:
+
+**Local Buffer Strategy**: Each process allocates `local_f` containing only the required input rows plus halo regions:
+
+```c
+// Calculate input region needed (with halo)
+int input_start = local_start * sH - pad_top;
+int input_end = (local_end - 1) * sH + kH - pad_top;
+
+// Clamp to valid input range
+if (input_start < 0) input_start = 0;
+if (input_end > H) input_end = H;
+int input_rows = input_end - input_start;
+
+// Allocate local input buffer if needed
+float **local_f = NULL;
+if (size > 1) {
+    local_f = allocate_2d_array(input_rows, W);
+    
+    // Gather required input rows (memory copy)
+    for (int i = 0; i < input_rows; i++) {
+        memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+    }
+}
+```
+
+**Memory Optimization Benefits:**
+- **Reduced memory footprint**: Each process only stores necessary data (typically 10-20% of total input)
+- **Improved cache locality**: Smaller working sets fit better in cache hierarchy
+- **Reduced memory bandwidth**: Less data movement between memory levels
+- **NUMA awareness**: Local buffers reduce cross-NUMA memory access
+
+**Halo Region Management:**
+The halo regions (overlapping input data) are calculated precisely:
+- **Top halo**: `pad_top = (kH - 1) / 2` rows above the assigned output region
+- **Bottom halo**: Additional rows below to cover kernel extent
+- **Memory efficiency**: Only necessary halo data is copied, minimizing memory overhead
+
+#### 2.5.5 OpenMP Thread-Level Cache Considerations
+
+The hybrid implementation addresses cache contention between OpenMP threads:
+
+```c
+#pragma omp parallel for schedule(dynamic, 16) collapse(2)
+for (int out_i = 0; out_i < local_rows; out_i++) {
+    for (int out_j = 0; out_j < out_W; out_j++) {
+        // Each thread works on independent output pixels
+        // Reduces false sharing and cache line conflicts
+```
+
+**Thread Cache Optimization:**
+- **Dynamic scheduling**: Prevents cache line conflicts by distributing work dynamically
+- **Chunk size (16)**: Balances load balancing with cache locality
+- **Collapse(2)**: Increases parallelism while maintaining spatial locality
+- **Independent output pixels**: Each thread writes to different memory locations, avoiding false sharing
+
 ## 3. Parallelisation Strategy
 
 This project employs a hybrid parallel model combining **OpenMP** and **MPI**, aiming to balance the high latency of inter-process communication in MPI with the low overhead of inter-thread synchronisation in OpenMP.
