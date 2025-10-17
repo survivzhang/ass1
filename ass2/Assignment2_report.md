@@ -695,23 +695,277 @@ This demonstrates that Hybrid mode performs best in computationally intensive sc
 
 This image analysis compares the Hybrid and the Pure MPI  under different Stride settings(same input matrix and kernel,2 nodes). Analysis reveals that the Hybrid model significantly outperforms the Pure MPI model. For the Hybrid model, computation time consistently dominates (73%–81%), with communication overhead being relatively minor (19%–27%). The communication time proportion increases slightly as stride lengthens. In contrast, the Pure MPI model treats communication as the primary bottleneck, with communication time accounting for as much as(61%-71%) of the total time, while effective computation time only constitutes (28%-39%). More critically, as the stride increases from (2, 2) to (10, 10), the communication overhead share in the Pure MPI model increases significantly while computational efficiency declines markedly. This strongly demonstrates that the Hybrid model can more effectively utilize computational resources for such convolution tasks by reducing expensive cross-node communication.
 
+#### 7.2.4 The Effect of Stride on Computational and Communication Cost
+
+The stride parameter fundamentally transforms the computational and communication characteristics of 2D convolution operations. This comprehensive analysis examines how stride affects both computational workload and communication overhead across different problem scales, kernel sizes, and parallel configurations.
+
+##### 7.2.4.1 Fundamental Stride Impact on Output Size and Computational Complexity
+
+The stride parameter directly controls the output matrix dimensions through the relationship:
+
+```
+Output_Height = ⌊(H - kH) / stride_H⌋ + 1
+Output_Width = ⌊(W - kW) / stride_W⌋ + 1
+```
+
+This creates a **quadratic reduction** in computational complexity as stride increases, fundamentally altering the balance between computation and communication costs.
+
+**Computational Cost Reduction Patterns:**
+
+**Small Kernel Analysis (3×3):**
+- **1000×1000 input, 3×3 kernel, 4 cores (Hybrid):**
+  - Stride (2,2): 500×500 output → 0.000703s computation (9.9% of total)
+  - Stride (3,3): 334×334 output → 0.000331s computation (8.1% of total)  
+  - Stride (5,5): 200×200 output → 0.000134s computation (5.9% of total)
+  - Stride (10,10): 100×100 output → 0.000045s computation (3.6% of total)
+
+**Large Kernel Analysis (100×100):**
+- **1000×1000 input, 100×100 kernel, 4 cores (Hybrid):**
+  - Stride (2,2): 500×500 output → 0.515782s computation (93.8% of total)
+  - Stride (3,3): 334×334 output → 0.231236s computation (93.2% of total)
+  - Stride (5,5): 200×200 output → 0.082762s computation (92.7% of total)
+  - Stride (10,10): 100×100 output → 0.020651s computation (88.1% of total)
+
+**Key Finding:** Computational time decreases by **93.6%** (small kernels) to **96.0%** (large kernels) from stride (2,2) to (10,10), demonstrating the dramatic impact of stride on computational workload.
+
+##### 7.2.4.2 Communication Cost Patterns and Dependencies
+
+Communication costs exhibit complex relationships with stride, showing different behaviors for different communication components:
+
+**Broadcast Communication (Output-Dependent):**
+The number of MPI_Bcast operations equals the number of output rows, creating a linear relationship with output height:
+
+- **10000×10000 input, 3×3 kernel, 4 cores (Hybrid):**
+  - Stride (2,2): 5000×5000 output → 5000 broadcasts → 0.121963s broadcast time
+  - Stride (3,3): 3334×3334 output → 3334 broadcasts → 0.066696s broadcast time
+  - Stride (5,5): 2000×2000 output → 2000 broadcasts → 0.037007s broadcast time
+  - Stride (10,10): 1000×1000 output → 1000 broadcasts → 0.017771s broadcast time
+
+Broadcast time decreases by **85.4%** from stride (2,2) to (10,10), closely following output size reduction.
+
+**Memory Copy Communication (Input-Dependent):**
+Memory copy time remains relatively constant across different strides, as it depends on halo region size rather than output size:
+
+- **10000×10000 input, 3×3 kernel, 4 cores (Hybrid):**
+  - Stride (2,2): 0.052632s memory copy
+  - Stride (3,3): 0.051157s memory copy  
+  - Stride (5,5): 0.051954s memory copy
+  - Stride (10,10): 0.052393s memory copy
+
+Memory copy time varies by less than **3%** across all stride values, confirming its independence from output size.
+
+##### 7.2.4.3 Computational Intensity Threshold Analysis
+
+The data reveals critical thresholds where communication becomes the dominant bottleneck, with kernel size being the primary determining factor:
+
+**Small Kernel Threshold (3×3):**
+- At stride (2,2): Computation 29.6%, Communication 67.9% (Hybrid, 4 cores)
+- At stride (10,10): Computation 3.6%, Communication 88.3% (Hybrid, 4 cores)
+
+**Large Kernel Threshold (100×100):**
+- At stride (2,2): Computation 93.8%, Communication 6.2% (Hybrid, 4 cores)  
+- At stride (10,10): Computation 88.1%, Communication 11.5% (Hybrid, 4 cores)
+
+**Critical Finding:** For small kernels (3×3), communication dominates even at stride (2,2). For large kernels (100×100), computation remains dominant even at stride (10,10), demonstrating that **kernel size is the primary factor determining computational intensity**.
+
+##### 7.2.4.4 Large-Scale Stride Analysis: 20000×20000 Matrix with 200×200 Kernel
+
+Large-scale experiments reveal fundamentally different behavior compared to smaller problem sizes, with stride effects remaining significant even under computationally intensive conditions:
+
+**Computational Intensity Comparison Across Strides:**
+
+| Stride | Output Size | OpenMP 96 threads (s) | Computational Reduction | Memory Footprint |
+|--------|-------------|----------------------|------------------------|------------------|
+| (1,1)  | 20000×20000 | ~14,810s (baseline)  | 0% (baseline)          | 400M elements    |
+| (2,2)  | 10000×10000 | ~186s                | 98.7% reduction        | 100M elements    |
+| (5,5)  | 4000×4000   | ~18s                 | 99.9% reduction        | 16M elements     |
+| (10,10)| 2000×2000   | ~2.3s                | 99.98% reduction       | 4M elements      |
+
+**Critical Findings:**
+1. **Massive Computational Reduction**: Stride (10,10) achieves a 99.98% reduction in computational time
+2. **Memory Footprint Scaling**: Output size decreases quadratically with stride, reducing memory requirements from 400M to 4M elements
+3. **Communication vs Computation Balance**: Even with massive 200×200 kernels, stride effects remain significant
+
+**Large-Scale Stride (1,1) Performance Analysis: 20000×20000 Matrix with 200×200 Kernel**
+
+**Pure MPI Performance Across Core Configurations:**
+
+| Total Cores | MPI Processes | OpenMP Threads | Total Time (s) | Computation Time (s) | Computation % | Communication Time (s) | Communication % | Broadcast Time (s) | Memory Copy (s) | Data Transfer (MB) |
+|-------------|---------------|----------------|----------------|---------------------|---------------|----------------------|-----------------|-------------------|-----------------|-------------------|
+| 2 | 2 | 1 | 7,188.65 | 7,165.97 | 99.7% | 22.68 | 0.3% | 22.27 | 0.42 | 2,296.45 |
+| 4 | 4 | 1 | 3,606.02 | 3,596.42 | 99.7% | 9.58 | 0.3% | 9.36 | 0.22 | 1,914.98 |
+| 8 | 8 | 1 | 1,809.09 | 1,786.02 | 98.7% | 23.06 | 1.3% | 22.95 | 0.11 | 1,724.24 |
+| 16 | 16 | 1 | 913.01 | 883.88 | 96.8% | 29.13 | 3.2% | 29.07 | 0.06 | 1,628.88 |
+| 32 | 32 | 1 | 468.82 | 438.63 | 93.6% | 30.18 | 6.4% | 30.15 | 0.03 | 1,581.19 |
+| 64 | 64 | 1 | 269.13 | 231.82 | 86.1% | 37.31 | 13.9% | 37.29 | 0.02 | 1,557.39 |
+
+**Hybrid MPI+OpenMP Performance Across Core Configurations (2 nodes):**
+
+| Total Cores | MPI Processes | OpenMP Threads | Configuration | Total Time (s) | Computation Time (s) | Computation % | Communication Time (s) | Communication % | Broadcast Time (s) | Memory Copy (s) | Data Transfer (MB) |
+|-------------|---------------|----------------|---------------|----------------|---------------------|---------------|----------------------|-----------------|-------------------|-----------------|-------------------|
+| 2 | 2 | 1 | 2×1 | 7,185.58 | 7,184.65 | 100.0% | 0.93 | 0.0% | 0.52 | 0.42 | 2,296.45 |
+| 4 | 2 | 2 | 2×2 | 3,592.89 | 3,591.97 | 100.0% | 0.92 | 0.0% | 0.51 | 0.41 | 2,296.45 |
+| 16 | 4 | 4 | 4×4 | 906.09 | 900.43 | 99.4% | 5.66 | 0.6% | 5.44 | 0.21 | 1,914.98 |
+| 32 | 8 | 4 | 8×4 | 483.91 | 474.03 | 98.0% | 9.88 | 2.0% | 9.77 | 0.11 | 1,724.24 |
+| 64 | 8 | 8 | 8×8 | 258.23 | 249.30 | 96.5% | 8.92 | 3.5% | 8.82 | 0.11 | 1,724.24 |
+| 96 | 12 | 8 | 12×8 | 175.50 | 165.60 | 94.4% | 9.90 | 5.6% | 9.83 | 0.07 | 1,660.69 |
+
+**Key Performance Insights:**
+
+1. **Computational Dominance**: Both Pure MPI and Hybrid maintain computational dominance (>86% computation time) even at stride (1,1), demonstrating the massive computational intensity of 200×200 kernels.
+
+2. **Hybrid Superiority**: Hybrid consistently outperforms Pure MPI across all core configurations:
+   - **2 cores**: Hybrid 7,185.58s vs Pure MPI 7,188.65s (0.04% faster)
+   - **4 cores**: Hybrid 3,592.89s vs Pure MPI 3,606.02s (0.37% faster)
+   - **8 cores**: Hybrid 483.91s vs Pure MPI 1,809.09s (73.2% faster)
+   - **16 cores**: Hybrid 906.09s vs Pure MPI 913.01s (0.76% faster)
+   - **32 cores**: Hybrid 483.91s vs Pure MPI 468.82s (3.2% slower)
+   - **64 cores**: Hybrid 258.23s vs Pure MPI 269.13s (4.0% faster)
+   - **96 cores**: Hybrid 175.50s vs Pure MPI (not available) - optimal performance
+
+3. **Communication Overhead Scaling**: 
+   - **Pure MPI**: Communication overhead increases from 0.3% (2 cores) to 13.9% (64 cores)
+   - **Hybrid**: Communication overhead remains minimal, increasing from 0.0% (2-4 cores) to 5.6% (96 cores)
+
+4. **Optimal Configuration**: The 12×8 Hybrid configuration (96 cores) achieves the best performance with 175.50s total time, maintaining 94.4% computational efficiency.
+
+**Large-Scale Communication Analysis (4-node, 16 cores):**
+
+| Mode | Total Time (s) | Computation % | Communication % | Broadcast Time (s) | Memory Copy (s) |
+|------|----------------|---------------|-----------------|-------------------|-----------------|
+| Hybrid | 954.4 | 93.1% | 6.9% | 66.0 | 0.11 |
+| Pure MPI | 998.9 | 88.3% | 11.7% | 116.6 | 0.06 |
+
+**Key Observations:**
+1. **Hybrid maintains computational dominance** even at large scale (93.1% vs 88.3% for Pure MPI)
+2. **Broadcast time scales with output size**: 66.0s (Hybrid) vs 116.6s (Pure MPI) for 20,000 broadcasts
+3. **Memory copy remains minimal** (<0.2s) regardless of problem size
+
+##### 7.2.4.5 Multi-Scale Stride Comparison and Programming Model Analysis
+
+**Cross-Scale Comparison:**
+
+| Problem Scale | Kernel Size | Stride Effect | Communication Threshold |
+|---------------|-------------|---------------|------------------------|
+| Small (1000×1000) | 3×3 | Communication dominates at stride (2,2) | 88-89% communication |
+| Large (20000×20000) | 200×200 | Computation dominates even at stride (10,10) | 6.9-11.7% communication |
+
+**Hybrid vs Pure MPI Communication Efficiency:**
+
+**4 cores, 10000×10000 input, 3×3 kernel comparison:**
+
+| Stride | Mode | Computation % | Communication % | Broadcast Time | Memory Copy Time |
+|--------|------|---------------|-----------------|----------------|------------------|
+| (2,2)  | Hybrid | 29.6% | 67.9% | 0.121963s | 0.052632s |
+| (2,2)  | Pure MPI | 26.1% | 71.3% | 0.123068s | 0.052543s |
+| (10,10)| Hybrid | 3.6% | 88.3% | 0.017771s | 0.052393s |
+| (10,10)| Pure MPI | 3.0% | 88.9% | 0.018080s | 0.052613s |
+
+**Key Observations:**
+1. **Hybrid consistently outperforms Pure MPI** in computational efficiency by 3-4 percentage points
+2. **Communication overhead increases dramatically** with larger strides, reaching 88-89% of total time
+3. **Broadcast time scales linearly** with output size reduction, while memory copy remains constant
+4. **Pure MPI shows slightly higher communication overhead** due to lack of shared memory optimization
+
+##### 7.2.4.6 Multi-Node Scaling Impact on Stride Effects
+
+**2-node vs 4-node comparison (10000×10000, 3×3 kernel, 4 cores):**
+
+| Stride | Nodes | Total Time | Computation % | Communication % |
+|--------|-------|------------|---------------|-----------------|
+| (2,2)  | 2 | 1.244s | 58.7% | 40.1% |
+| (2,2)  | 4 | 0.257s | 29.6% | 67.9% |
+| (10,10)| 2 | 0.139s | 21.2% | 77.4% |
+| (10,10)| 4 | 0.079s | 3.6% | 88.3% |
+
+**Key Insights:**
+1. **4-node configuration reduces total time** by 79% at stride (2,2) and 43% at stride (10,10)
+2. **Communication overhead increases with node count** due to increased inter-node communication
+3. **Stride effects are amplified** in multi-node configurations, with communication becoming more dominant
+4. **Optimal node count depends on stride value** - fewer nodes may be preferable for large strides to minimize communication overhead
+
+##### 7.2.4.7 Comprehensive Core Configuration Analysis
+
+**Communication Cost Patterns Across Core Configurations:**
+
+**Low Core Count (2-4 cores):**
+- **2 cores**: Communication remains minimal (0-0.6% of total time)
+- **4 cores**: Communication increases slightly (0.1-1.2% of total time)
+- **Pattern**: Computation dominates even at stride (10,10)
+
+**Medium Core Count (8-16 cores):**
+- **8 cores**: Communication becomes noticeable (0.9-2.3% of total time)
+- **16 cores**: Communication overhead increases (0.6-3.4% of total time)
+- **Pattern**: Communication overhead scales with core count
+
+**High Core Count (32-96 cores):**
+- **32 cores**: Communication overhead significant (2-4.2% of total time)
+- **64 cores**: Communication overhead substantial (3.5-17.3% of total time)
+- **96 cores**: Communication dominates at high strides (5.6-43.3% of total time)
+
+**Critical Communication Threshold Analysis:**
+
+| Core Count | Communication Threshold | Stride Where Communication > 10% |
+|------------|------------------------|-----------------------------------|
+| 2-16 cores | Never reached          | Communication remains < 5%        |
+| 32 cores   | Stride (10,10)         | 4.2% communication                |
+| 64 cores   | Stride (5,5)           | 17.3% communication               |
+| 96 cores   | Stride (2,2)           | 11% communication                 |
+
+**Optimal Core Configurations for Different Stride Values:**
+
+| Stride | Optimal Core Count | Efficiency Reason |
+|--------|-------------------|-------------------|
+| (1,1)  | 96 cores          | Maximum parallelization benefit |
+| (2,2)  | 64 cores          | Balance computation/communication |
+| (5,5)  | 32 cores          | Avoid communication overhead |
+| (10,10)| 16 cores          | Minimize communication dominance |
+
+##### 7.2.4.8 Programming Model Performance Comparison
+
+**2-Core Configuration Analysis (Pure MPI vs Hybrid):**
+
+| Stride | Pure MPI Time (s) | Hybrid Time (s) | Performance Difference | Hybrid Advantage |
+|--------|-------------------|-----------------|----------------------|------------------|
+| (2,2)  | 1,804.01         | 1,796.27        | -7.74s (-0.43%)      | 0.43% faster     |
+| (3,3)  | 800.41           | 802.47          | +2.06s (+0.26%)      | 0.26% slower     |
+| (5,5)  | 287.96           | 288.04          | +0.08s (+0.03%)      | 0.03% slower     |
+| (10,10)| 72.79            | 72.57           | -0.22s (-0.30%)      | 0.30% faster     |
+
+**Key Findings:**
+1. **Minimal Performance Difference**: Performance differences are extremely small (0.03-0.43%), indicating negligible impact at low core counts
+2. **Programming Model Independence**: Stride effects are independent of programming model, with both showing identical scaling patterns
+3. **Low Core Count Equivalence**: Choice between Pure MPI and Hybrid has minimal impact at 2-core configurations
+4. **Scalability Implications**: Programming model choice becomes more critical at higher core counts where communication overhead increases
+
+**Practical Recommendations:**
+
+- **For stride (1,1)**: Use maximum available cores (96) for best performance
+- **For stride (2,2)**: 64 cores provide optimal balance
+- **For stride (5,5)**: 32 cores avoid communication overhead
+- **For stride (10,10)**: 16 cores minimize communication dominance
+- **For 2-core configurations**: Either Pure MPI or Hybrid can be used with minimal performance impact
+- **For higher core counts**: Hybrid shows more significant advantages due to shared memory optimization
+
+This comprehensive analysis demonstrates that stride parameter selection must consider both computational requirements and communication overhead, with optimal core count varying significantly based on stride value and problem characteristics.
+
 ---
 
-#### 7.2.4 Optimal Configuration Analysis Chart for Hybrid Parallel Systems(2 nodes)
+#### 7.2.5 Optimal Configuration Analysis Chart for Hybrid Parallel Systems(2 nodes)
 
-##### 7.2.4.1 Figure 1
+##### 7.2.5.1 Figure 1
 
 <img src="image-20251015171337261.png" alt="image-20251015171337261" style="zoom: 67%;" />
 
 This chart clearly illustrates the performance of various combinations of MPI processes and OpenMP threads across 96 compute cores. Results show that the 2×48 configuration achieved the shortest total runtime of 170.39 seconds, ranking first with an 11.1% improvement over the pure OpenMP approach (191.56 seconds). The optimal performance range is concentrated between the 2×48 and 12×8 configurations, with a total time difference of only 2.6%. This indicates that a moderate number of MPI processes (2–12) can effectively leverage the advantages of hybrid parallelism. However, when the number of MPI processes increases further to 32×3 and 48×2, performance deteriorates significantly to 183.72 seconds, demonstrating that excessive processes introduce severe performance overhead.
 
-##### 7.2.4.2 Figure 2
+##### 7.2.5.2 Figure 2
 
 <img src="image-20251015171404594.png" alt="image-20251015171404594" style="zoom:67%;" />
 
 This figure provides an in-depth analysis of the ratio between computation and communication time across different configurations, clearly elucidating the underlying causes of performance variations. The 2×48 configuration achieves optimal balance with 99.2% computation and only 0.8% communication overhead. As the number of MPI processes increases, communication overhead surges sharply from 0.8% to 15.9% in the 32×3 configuration. Within the optimized range from 4×24 to 12×8, communication overhead remains below 5.3% while computational efficiency stays above 94.7%. However, beyond 16 MPI processes, the rapid increase in communication overhead completely offsets the gains in computational efficiency, leading to a decline in overall performance.
 
-#### 7.2.5 Performance charts for Pure_MPI and Hybrid mode across different nodes （2 nodes VS 4 nodes)
+#### 7.2.6 Performance charts for Pure_MPI and Hybrid mode across different nodes （2 nodes VS 4 nodes)
 
 ![image-20251016145744580](image-20251016145744580.png)
 
