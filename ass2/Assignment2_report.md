@@ -171,9 +171,106 @@ void conv2d_stride(float **f, int H, int W, float **g, int kH, int kW, int sH, i
 
 Combines MPI's distributed memory (inter-process communication) with OpenMP's shared memory (inter-thread parallelism). MPI handles the coarse-grained parallelisation by allocating output rows to processes. Within each MPI process, OpenMP employs parallel for loops (as seen in `conv2d_omp_stride`) to parallelise the locally computed output rows, achieving fine-grained parallelism. Result collection similarly utilises `MPI_Bcast`.
 
-### 2.5 Memory Layout and Cache Optimization
+### 2.5 Array Representation Communication and Memory Management
 
-#### 2.5.1 Row-Major Memory Layout
+#### 2.5.1 Data Structure Design
+
+Our implementation uses a **two-dimensional array of pointers** (`float**`) representation for all arrays:
+
+```c
+// Array representation: float** (array of pointers)
+float **f;      // Input array: f[H][W]
+float **g;      // Kernel array: g[kH][kW] 
+float **output; // Output array: output[out_H][out_W]
+```
+
+**Memory Layout Details:**
+- **Row pointers**: Each array is an array of pointers, where each pointer points to a row of data
+- **Row-major storage**: Within each row, elements are stored consecutively in memory
+- **Dynamic allocation**: Memory is allocated at runtime using `allocate_2d_array()`
+
+#### 2.5.2 Memory Allocation Strategy
+
+```c
+float** allocate_2d_array(int rows, int cols) {
+    // Allocate array of row pointers
+    float **array = (float**)malloc(rows * sizeof(float*));
+    
+    // Allocate each row individually
+    for (int i = 0; i < rows; i++) {
+        array[i] = (float*)malloc(cols * sizeof(float));
+    }
+    return array;
+}
+```
+
+**Advantages of this approach:**
+- **Flexibility**: Each row can be allocated independently
+- **Cache efficiency**: Row-wise access patterns are optimized
+- **Memory management**: Individual rows can be freed independently
+- **Alignment**: Each row can be properly aligned for vectorization
+
+#### 2.5.3 Array Access Patterns
+
+**Input Array (f):**
+- **Global access**: Initially, all processes have access to the complete input array
+- **Local buffers**: Each process creates local copies of required regions
+- **Halo regions**: Local buffers include overlapping boundary data
+
+**Kernel Array (g):**
+- **Shared access**: All processes use the same kernel data
+- **Cache resident**: Small kernels (3×3 to 200×200) fit entirely in L1/L2 cache
+- **Read-only**: Kernel data is not modified during computation
+
+**Output Array (output):**
+- **Distributed computation**: Each process computes assigned rows
+- **Global collection**: Results are gathered to all processes via MPI_Bcast
+- **Final state**: All processes have complete output array after communication
+
+#### 2.5.4 Inter-Process Communication
+
+**Input Data Distribution (SPMD Model):**
+```c
+// Each process starts with complete input array f
+// Process determines local input region needed
+int input_start = local_start * sH - pad_top;
+int input_end = (local_end - 1) * sH + kH - pad_top;
+
+// Create local buffer with halo data
+float **local_f = allocate_2d_array(input_rows, W);
+for (int i = 0; i < input_rows; i++) {
+    memcpy(local_f[i], f[input_start + i], W * sizeof(float));
+}
+```
+
+**Output Data Collection (All-Broadcast Gathering):**
+```c
+// Each process computes its assigned output rows
+// Then broadcasts results to all other processes
+for (int p = 0; p < size; p++) {
+    int p_start = p * rows_per_proc;
+    int p_end = (p + 1) * rows_per_proc;
+    int p_rows = p_end - p_start;
+    
+    // Process p broadcasts its computed rows
+    for (int i = 0; i < p_rows; i++) {
+        MPI_Bcast(output[p_start + i], out_W, MPI_FLOAT, p, comm);
+    }
+}
+```
+
+**Communication Volume Analysis:**
+```
+Total Communication = Input Copy + Output Broadcast
+Input Copy = P × (local_rows + halo) × W × 4 bytes
+Output Broadcast = out_H × out_W × 4 bytes
+```
+
+Where P is the number of MPI processes.
+
+## 3. Cache and Memory-Layout Considerations within Each MPI Process
+
+### 3.1 Row-Major Memory Layout
 
 Our implementation uses row-major memory layout (array[row][col]), which provides several performance advantages:
 
@@ -189,7 +286,7 @@ f[1][0] f[1][1] f[1][2] ... f[1][W-1]  ← Row 1 (consecutive in memory)
 f[H-1][0] f[H-1][1] ... f[H-1][W-1]   ← Row H-1 (consecutive in memory)
 ```
 
-#### 2.5.2 Access Pattern Optimization
+### 3.2 Access Pattern Optimization
 
 The nested loop structure is carefully designed for cache efficiency:
 
@@ -207,7 +304,7 @@ for (int i = 0; i < H; i++) {           // Row-wise iteration (outer)
 2. **Kernel reuse**: The kernel `g[ki][kj]` is accessed repeatedly and typically fits entirely in L1 cache
 3. **Output locality**: Writing to `output[i][j]` maintains spatial locality
 
-#### 2.5.3 Block Size Optimization for Cache
+### 3.3 Block Size Optimization for Cache
 
 The `conv2d_omp_blocked()` function implements adaptive block sizing based on cache hierarchy:
 
@@ -235,7 +332,7 @@ if (H < 100) {
 - **L3 Cache (8MB)**: Large blocks for big matrices
 - **Memory bandwidth**: Block sizes chosen to maximize memory bandwidth utilization
 
-#### 2.5.4 MPI Process Memory Management
+### 3.4 MPI Process Memory Management
 
 Within each MPI process, we implement several memory optimizations to minimize cache misses and memory bandwidth:
 
@@ -275,7 +372,7 @@ The halo regions (overlapping input data) are calculated precisely:
 - **Bottom halo**: Additional rows below to cover kernel extent
 - **Memory efficiency**: Only necessary halo data is copied, minimizing memory overhead
 
-#### 2.5.5 OpenMP Thread-Level Cache Considerations
+### 3.5 OpenMP Thread-Level Cache Considerations
 
 The hybrid implementation addresses cache contention between OpenMP threads:
 
@@ -293,7 +390,7 @@ for (int out_i = 0; out_i < local_rows; out_i++) {
 - **Collapse(2)**: Increases parallelism while maintaining spatial locality
 - **Independent output pixels**: Each thread writes to different memory locations, avoiding false sharing
 
-## 3. Parallelisation Strategy
+## 4. Parallelisation Strategy
 
 This project employs a hybrid parallel model combining **OpenMP** and **MPI**, aiming to balance the high latency of inter-process communication in MPI with the low overhead of inter-thread synchronisation in OpenMP.
 
@@ -301,7 +398,7 @@ This project employs a hybrid parallel model combining **OpenMP** and **MPI**, a
 
 ​       **OpenMP** layer (fine-grained): Responsible for accelerating locally assigned computational tasks within each MPI process by utilising multi-core resources on the node (thread-level parallelism).
 
-### 3.1 How MPI Assigns Data (Coarse-Grained Parallelism)
+### 4.1 How MPI Assigns Data (Coarse-Grained Parallelism)
 
 MPI handles the **coarse-grained** parallelization and data distribution among different computing **processes** (ranks).
 
@@ -330,7 +427,7 @@ MPI handles the **coarse-grained** parallelization and data distribution among d
     int local_rows = local_end - local_start;
 ```
 
-### 3.2 How OpenMP Parallelizes within Each Process (Fine-Grained Parallelism)
+### 4.2 How OpenMP Parallelizes within Each Process (Fine-Grained Parallelism)
 
 OpenMP is used for **fine-grained** parallelism **within the shared memory space** of each individual MPI process.
 
@@ -367,7 +464,8 @@ OpenMP is used for **fine-grained** parallelism **within the shared memory space
 
 ---
 
-## 4. Data decomposition and distribution
+
+## 5. Data decomposition and distribution
 
 Data decomposition focuses on how the **input array** (`f`) is provided to each MPI process to support its local output calculation.
 
@@ -400,7 +498,7 @@ Data decomposition focuses on how the **input array** (`f`) is provided to each 
         }
 ```
 
-## 5. Communication strategy and synchronisation
+## 6. Communication strategy and synchronisation
 
 The communication strategy's primary role is to **collect** the locally computed results from all processes and ensure that all processes possess the final, complete output.
 
@@ -431,13 +529,13 @@ The communication strategy's primary role is to **collect** the locally computed
 
 ---
 
-## 6. Performance Analysis
+## 7. Performance Analysis
 
 Performance was measured on **Kaya HPC** using different input sizes and thread counts.
 
-### 6.1 Metrics collected:
+### 7.1 Metrics collected:
 
-#### 6.1.1 Mathematical formula
+#### 7.1.1 Mathematical formula
 
 | Variable                | Symbol          | Description                                                  |
 | ----------------------- | --------------- | ------------------------------------------------------------ |
@@ -450,7 +548,7 @@ Performance was measured on **Kaya HPC** using different input sizes and thread 
 | Speedup               | S(P,T) | S=T_serial/T_parallel(P,T) | Measures how many times faster the parallel version is compared to the serial baseline. Ideal Value: S≈C. |
 | Efficiency            | E(P,T) | E=S(P,T)/C×100%            | Measures how effectively the total allocated resources (C) are utilized. Ideal Value: E≈100%. Efficiency less than 100% indicates overhead from communication, synchronization, or load imbalance. |
 
-#### 6.1.2 Pure computing time analysis
+#### 7.1.2 Pure computing time analysis
 
 In the `performance_analysis_threads` function within the `conv2d.c` file, we use the following code to specify that only pure computation time is measured:
 
@@ -475,9 +573,9 @@ In the `performance_analysis_threads` function within the `conv2d.c` file, we us
 
 ​       • Warm-up runs: The code performs an untimed “warm-up” run before the timed loop. This crucial step ensures the program code and relevant data (such as input matrices and convolution kernels) are loaded into the CPU cache. Consequently, the actual timed run avoids “cold start” effects (e.g., data loading from main memory), yielding more accurate and repeatable performance data.
 
-#### 6.1.3 Communication time analysis
+#### 7.1.3 Communication time analysis
 
-##### 6.1.3.1 Memory Copy Time
+##### 7.1.3.1 Memory Copy Time
 
 This portion of time is spent preparing the local input data (**Halo**) required for each MPI process.
 
@@ -496,7 +594,7 @@ stats->memory_copy_time += MPI_Wtime() - t_comm_start;
 
 Meaning: In a distributed memory environment, this memory replication represents the overhead incurred by a process preparing local data. Although it occurs within the process itself, it is fundamentally part of communication work, as it involves transforming global (or initial) data into locally computable data.
 
-##### 6.1.3.2 Broadcast Time
+##### 7.1.3.2 Broadcast Time
 
 This portion of time represents the overhead incurred to synchronize and share computation results among all MPI processes.
 
@@ -517,11 +615,11 @@ stats->broadcast_time = MPI_Wtime() - t_comm_start;
 
 Meaning: `MPI_Bcast` is a standard MPI collective communication operation, representing the most direct communication overhead in distributed parallel computing.
 
-### 6.2 Figures and charts:
+### 7.2 Figures and charts:
 
-#### 6.2.1 Overall Performance Comparison and Scalability Analysis Chart
+#### 7.2.1 Overall Performance Comparison and Scalability Analysis Chart
 
-##### 6.2.1.1 Figure 1
+##### 7.2.1.1 Figure 1
 
 ![image-20251015182614196](image-20251015182614196.png)
 
@@ -543,7 +641,7 @@ This chart powerfully demonstrates the exceptional scalability of parallel convo
 2. Low Communication/Computational Ratio: Given the substantial computational task granularity assigned to each core, the growth in communication volume (Halo Exchange) and synchronisation frequency (MPI_Bcast loops) required for boundary data exchange and result collection remains minimal relative to the total computational load.
 3. Pattern Performance Convergence: The OpenMP, Hybrid, and Pure_MPI curves remain remarkably close across the entire test range (from 1 to 100 cores). This indicates that in this compute-bound scenario, computational time constitutes the primary bottleneck, rendering communication overhead—whether synchronisation in shared memory or MPI messaging in distributed memory—negligible. This validates that the row-blocking and loop-parallelisation strategy adopted for tackling large-scale problems is both efficient and correct.
 
-##### 6.2.1.2 Figure 2
+##### 7.2.1.2 Figure 2
 
 ![image-20251015182905379](image-20251015182905379.png)
 
@@ -555,7 +653,7 @@ The figure above illustrates that parallel overhead dominates, with insufficient
 
 In computationally intensive scenarios such as20000 x 20000, the performance of pure MPI mode is marginally lower due to its inherent high communication latency (though computationally intensive, latency still persists). The Hybrid mode successfully balances computational and communication overhead by employing OpenMP for efficient intra-node computation while minimising inter-node communication through fewer MPI processes. This equilibrium enables the Hybrid mode to utilise all  cores more effectively, thereby achieving performance closer to the ideal speedup ratio.
 
-##### 6.2.1.3 Figure 3
+##### 7.2.1.3 Figure 3
 
 ![image-20251015183021368](image-20251015183021368.png)
 
@@ -567,23 +665,23 @@ This figure represents the efficiency of a 20000x20000 input matrix and a 200x20
 
 Hybrid achieves peak efficiency by striking the optimal balance between communication overhead and thread contention. It leverages MPI's cross-node capabilities to attain higher speedup than OpenMP, while utilizing OpenMP's low-latency shared memory to achieve greater efficiency than Pure_MPI. This represents the optimal strategy for running massively parallel programs on HPC clusters.
 
-#### 6.2.2 Communication/Computational Overhead Analysis Chart
+#### 7.2.2 Communication/Computational Overhead Analysis Chart
 
-##### 6.2.2.1 Figure 1
+##### 7.2.2.1 Figure 1
 
 ![image-20251015164605783](image-20251015164605783.png)
 
 The figure above shows the proportion of computation time versus communication time for hybrid and pure MPI implementations across different input matrices (1000x1000, 10000x10000) and 3x3 cores at varying core counts. It is evident that communication time significantly outweighs computation time in both scenarios. This explains why the total runtime, acceleration ratio, and efficiency variations did not achieve optimal results under these conditions.
 
-##### 6.2.2.2 Figure 2
+##### 7.2.2.2 Figure 2
 
 ![image-20251015170333640](image-20251015170333640.png)
 
 The figure above shows the proportion of computation time versus communication time for hybrid and pure MPI implementations on different input matrices (20000x20000) and 3x3 cores across varying core counts. It is evident that in both scenarios, computation time significantly outweighs communication time. This indicates that for large-scale matrices under these conditions, the total runtime, acceleration ratio, and efficiency variations have reached an ideal state.
 
-#### 6.2.3 Stride Influence Analysis Chart
+#### 7.2.3 Stride Influence Analysis Chart
 
-##### 6.2.3.1 Figure 1
+##### 7.2.3.1 Figure 1
 
 <img src="image-20251016152522988.png" alt="image-20251016152522988" style="zoom: 67%;" />
 
@@ -591,7 +689,7 @@ The figure above shows the variation in total runtime for hybrid, pure MPI, and 
 
 This demonstrates that Hybrid mode performs best in computationally intensive scenarios (small strides) due to its load balancing advantages. For instance, at stride (2,2), it took 1.244 seconds—significantly outperforming OpenMP's 1.387 seconds. However, as computational intensity decreases with increasing stride, OpenMP gradually gains an advantage by avoiding cross-node communication overhead. At stride (10,10), it completes in just 0.047 seconds—approximately 66% faster than Hybrid's 0.139 seconds. Pure MPI consistently lags due to communication overhead. This trend demonstrates that the optimal parallelization strategy must be dynamically selected based on specific computational intensity.
 
-##### 6.2.3.2 Figure 2
+##### 7.2.3.2 Figure 2
 
 ![image-20251009125741666](image-20251009125741666.png)
 
@@ -599,21 +697,21 @@ This image analysis compares the Hybrid and the Pure MPI  under different Stride
 
 ---
 
-#### 6.2.4 Optimal Configuration Analysis Chart for Hybrid Parallel Systems(2 nodes)
+#### 7.2.4 Optimal Configuration Analysis Chart for Hybrid Parallel Systems(2 nodes)
 
-##### 6.2.4.1 Figure 1
+##### 7.2.4.1 Figure 1
 
 <img src="image-20251015171337261.png" alt="image-20251015171337261" style="zoom: 67%;" />
 
 This chart clearly illustrates the performance of various combinations of MPI processes and OpenMP threads across 96 compute cores. Results show that the 2×48 configuration achieved the shortest total runtime of 170.39 seconds, ranking first with an 11.1% improvement over the pure OpenMP approach (191.56 seconds). The optimal performance range is concentrated between the 2×48 and 12×8 configurations, with a total time difference of only 2.6%. This indicates that a moderate number of MPI processes (2–12) can effectively leverage the advantages of hybrid parallelism. However, when the number of MPI processes increases further to 32×3 and 48×2, performance deteriorates significantly to 183.72 seconds, demonstrating that excessive processes introduce severe performance overhead.
 
-##### 6.2.4.2 Figure 2
+##### 7.2.4.2 Figure 2
 
 <img src="image-20251015171404594.png" alt="image-20251015171404594" style="zoom:67%;" />
 
 This figure provides an in-depth analysis of the ratio between computation and communication time across different configurations, clearly elucidating the underlying causes of performance variations. The 2×48 configuration achieves optimal balance with 99.2% computation and only 0.8% communication overhead. As the number of MPI processes increases, communication overhead surges sharply from 0.8% to 15.9% in the 32×3 configuration. Within the optimized range from 4×24 to 12×8, communication overhead remains below 5.3% while computational efficiency stays above 94.7%. However, beyond 16 MPI processes, the rapid increase in communication overhead completely offsets the gains in computational efficiency, leading to a decline in overall performance.
 
-#### 6.2.5 Performance charts for Pure_MPI and Hybrid mode across different nodes （2 nodes VS 4 nodes)
+#### 7.2.5 Performance charts for Pure_MPI and Hybrid mode across different nodes （2 nodes VS 4 nodes)
 
 ![image-20251016145744580](image-20251016145744580.png)
 
@@ -621,6 +719,6 @@ This chart compares the scalability performance of Pure MPI and Hybrid mode acro
 
 At identical core counts, the 4-node configuration consistently demonstrates superior performance compared to the 2-node setup. Specifically, at 96 cores, the 4-node Hybrid mode completed in 183.06 seconds, 0.4% faster than the 2-node's 183.72 seconds. At 64 cores, the difference was more pronounced: the 4-node Pure MPI achieved 262.01 seconds, outperforming the 2-node's 269.13 seconds. This advantage primarily stems from the 4-node architecture's superior ability to distribute communication load and reduce resource contention within individual nodes. Performance gains are most pronounced in the mid-range core count (32-64 cores), where the 4-node Hybrid configuration outperformed the 2-node setup by 4.1% at 32 cores. However, as core counts increase further, cross-node communication overhead begins to dominate performance, causing the two node configurations to converge in performance at the highest core counts.
 
-## 7. Conclusion
+## 8. Conclusion
 
 This experiment systematically validated the significant advantages of the MPI+OpenMP hybrid parallelism model in large-scale two-dimensional convolution computations through comprehensive performance testing and analysis. Experimental results demonstrate that in computationally intensive scenarios (e.g., 20000×20000 matrix with 200×200 convolution kernel), the 2×48 hybrid configuration achieved optimal performance with a minimum runtime of 170.39 seconds—representing an 11.1% improvement over pure OpenMP. This advantage stems from effectively balancing computational load and communication overhead through an optimal number of MPI processes (2–12). As problem scale varies, the optimal parallelization strategy requires dynamic adjustment—hybrid parallelism suits computationally intensive tasks, while pure OpenMP is more suitable for computationally light tasks. Additionally, the 4-node architecture demonstrates superior scalability within the medium core range through better communication load distribution.
