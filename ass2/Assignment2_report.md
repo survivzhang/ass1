@@ -523,7 +523,7 @@ The communication strategy's primary role is to **collect** the locally computed
 
 ## 6. Performance Analysis
 
-Performance was measured on **Kaya HPC** using different input sizes and thread counts.
+Performance was measured on **Kaya HPC** (OpenMP) and **Setonix** (MPI and hybrid) using different input sizes and thread counts.
 
 ### 6.1 Metrics collected:
 

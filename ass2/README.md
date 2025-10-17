@@ -19,17 +19,17 @@ make clean
 make
 ```
 
-### How the Makefile Works:
-1. **First tries `mpicc`** (if modules are loaded)
-2. **Falls back to `gcc`** with common MPI paths
-3. **Tests MPI header availability** automatically
+### If Build Fails
 
-# Then build:
-make clean && make
+If the build fails due to missing MPI libraries, try loading the required modules first:
 
-# Setting up MPI Environment :
 ```bash
-# On Setonix: No modules needed, use srun directly
+# Load MPI module
+module load mpi
+
+# Then try building again
+make clean
+make
 ```
 
 ### Basic Usage
@@ -144,26 +144,27 @@ For input size H×W with stride sH×sW:
 - **OpenMP level**: Parallelizes computation within each process
 - Optimized for cache locality and load balancing
 
-## Quick Reference
+## SLURM Job Script Example
 
-### Common Commands
+For running jobs on HPC clusters like Setonix, use the provided `example_slurm.sh` script:
 
 ```bash
-# Build
-make clean && make
-
-# Test all modes
-./conv_stride_test -H 100 -W 100 -kH 3 -kW 3 -sH 1 -sW 1 -m serial
-export OMP_NUM_THREADS=4; ./conv_stride_test -H 100 -W 100 -kH 3 -kW 3 -sH 1 -sW 1 -m omp
-# Setonix Quick Test:
-srun -n 2 ./conv_stride_test -H 100 -W 100 -kH 3 -kW 3 -sH 1 -sW 1 -m mpi
-export OMP_NUM_THREADS=2; srun -n 2 --cpus-per-task=2 ./conv_stride_test -H 100 -W 100 -kH 3 -kW 3 -sH 1 -sW 1 -m hybrid
+# Submit the job to SLURM
+sbatch example_slurm.sh
 ```
 
-### Key Points
+### SLURM Script Configuration
 
-- **`-m hybrid`** uses both MPI and OpenMP, but **you control the distribution**
-- **`srun -n N`** sets number of MPI processes
-- **`export OMP_NUM_THREADS=M`** sets OpenMP threads per process
-- **Total cores = N × M**
-- **Test different distributions** to find optimal performance
+The `example_slurm.sh` script demonstrates a typical hybrid MPI+OpenMP job:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=hybrid_20k_s2_c2
+#SBATCH --nodes=2
+#SBATCH --ntasks=2
+#SBATCH --cpus-per-task=1
+#SBATCH --time=02:00:00
+#SBATCH --output=output/hybrid_20k_s2_c2_%j.out
+#SBATCH --error=output/hybrid_20k_s2_c2_%j.err
+#SBATCH --partition=cits3402
+
